@@ -212,6 +212,7 @@ actions
   setAddress (recipient: Recipient, address: String) : return ()
     then
       add recipient to the set of Recipients if it is not there
+      set address of recipient to the given address
       return
 
   notify (recipient: Recipient, message: String, link: String) : return (notification: Notification)

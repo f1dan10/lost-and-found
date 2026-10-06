@@ -76,7 +76,7 @@ The idea is to create a shared, campus-wide **lost and found app** that connects
 
 A finder could create a report containing a description and optional photo of the item, along with where and approximately when it was found. A person who lost an item could similarly create a report describing it and giving the area or set of areas where they believe it may have been lost.
 
-Because a finder's willingness to help is real but small, this report has to cost less than the alternatives it replaces. The intended interaction is one photo and a building picked from a list of MIT locations, and the item stays where it is. Filling in the location automatically from the finder's phone is a possible future improvement. A finder who does choose to move the item to a desk or department can record where they left it, so the item's current location survives the handoff.
+Because a finder's willingness to help is real but small, this report has to cost less than the alternatives it replaces. The intended interaction is one photo and a building picked from a list of MIT locations, and the item stays where it is. Filling in the location automatically from the finder's phone is a possible future improvement.
 
 The system would then make these reports discoverable to other MIT users. Location would be central to the interaction: users could browse recent found items near a particular location, while lost-item reports could describe an area in which the owner believes the item was lost. A map could provide a visual way to discover found items by location.
 
