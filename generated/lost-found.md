@@ -29,6 +29,25 @@ Defined in [Authenticating](../design/concepts/Authenticating.md), line 1.
 - `Authenticating` — instance of `Authenticating` — [Lost&Found types](../design/types.md), line 8.
   - `User` is `Registering.User` — [Lost&Found types](../design/types.md), line 9.
 
+### Claiming
+
+Defined in [Claiming](../design/concepts/Claiming.md), line 1.
+
+#### Actions
+
+- `claim(claimant: Claimant, item: Item) : returns (item: Item)`
+  - Refuses `ALREADY_CLAIMED`: This item has already been claimed.
+
+#### Queries
+
+- `_getClaimant(item: Item) : optional (claimant: Claimant, claimedAt: DateTime)`
+
+#### Instances
+
+- `Claiming` — instance of `Claiming` — [Lost&Found types](../design/types.md), line 24.
+  - `Claimant` is `Registering.User` — [Lost&Found types](../design/types.md), line 25.
+  - `Item` is `Reporting.Report` — [Lost&Found types](../design/types.md), line 26.
+
 ### Locating
 
 Defined in [Locating](../design/concepts/Locating.md), line 1.

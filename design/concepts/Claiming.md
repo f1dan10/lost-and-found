@@ -1,0 +1,50 @@
+# Claiming
+
+## Purpose
+
+Make taking a thing accountable by recording who took it.
+
+*Prevents:* two people both take the same item; a claim has no account behind it.
+
+## Principle
+
+Tamar claims the bottle Tom found. When anyone asks who claimed it, they are told Tamar, with the time she claimed it. When a second person tries to claim the same bottle, they are refused with "This item has already been claimed."
+
+## Types
+
+```types
+external Claimant
+  The person who takes the item.
+
+external Item
+  The thing that is taken.
+```
+
+## State
+
+```state
+a set of Claims with
+  a claimant Claimant
+  a unique item Item
+  a claimedAt DateTime
+```
+
+## Actions
+
+```actions
+claim(claimant: Claimant, item: Item) : returns (item: Item)
+  where some claim has item
+  then
+    refuses ALREADY_CLAIMED "This item has already been claimed."
+  where no claim has item
+  then
+    add a new claim with claimant, item, and claimedAt now
+    returns item
+```
+
+## Queries
+
+```queries
+_getClaimant(item: Item) : optional (claimant: Claimant, claimedAt: DateTime)
+  Returns who claimed the item and when, or no row when the item is unclaimed or unknown.
+```
