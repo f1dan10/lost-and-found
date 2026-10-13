@@ -48,6 +48,32 @@ Defined in [Registering](../design/concepts/Registering.md), line 1.
 
 - `Registering` — instance of `Registering` — [Lost&Found types](../design/types.md), line 6.
 
+### Reporting
+
+Defined in [Reporting](../design/concepts/Reporting.md), line 1.
+
+#### Actions
+
+- `file(reporter: Reporter, kind: Kind, category: Category, description: String, photo?: String) : returns (report: Report)`
+  - Refuses `INVALID_REPORT`: A report needs a kind, a category, a description of 1 to 500 characters, and a photo that is not too large.
+- `resolve(report: Report) : returns (report: Report)`
+  - Refuses `REPORT_NOT_FOUND`: There is no such report.
+  - Refuses `NOT_OPEN`: This report is no longer open.
+- `withdraw(report: Report) : returns (report: Report)`
+  - Refuses `REPORT_NOT_FOUND`: There is no such report.
+  - Refuses `NOT_OPEN`: This report is no longer open.
+
+#### Queries
+
+- `_getOpen(kind: Kind, category?: Category) : many (report: Report)`
+- `_getReport(report: Report) : optional (reporter: Reporter, kind: Kind, category: Category, description: String, filedAt: DateTime, status: Status)`
+- `_getPhoto(report: Report) : optional (photo: String)`
+
+#### Instances
+
+- `Reporting` — instance of `Reporting` — [Lost&Found types](../design/types.md), line 14.
+  - `Reporter` is `Registering.User` — [Lost&Found types](../design/types.md), line 15.
+
 ### Sessioning
 
 Defined in [Sessioning](../design/concepts/Sessioning.md), line 1.
