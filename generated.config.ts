@@ -18,6 +18,7 @@ export default {
       new URL("./design/compositions/reusable/accounts.md", import.meta.url),
       new URL("./design/compositions/reusable/passwords.md", import.meta.url),
       new URL("./design/compositions/access.md", import.meta.url),
+      new URL("./design/compositions/addressing.md", import.meta.url),
     ],
   },
   projections: [httpWire({ policy: lostFoundPolicy("http://localhost:3000"), name: "LostFoundWireHttp" })],

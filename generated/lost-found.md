@@ -208,6 +208,17 @@ then
   RequestBoundary.respond (error: message, requestId)
 ```
 
+### addressing.giving.GiveAddress
+
+Authored path: `addressing.giving.GiveAddress`.
+- Covered by [Addressing](../design/compositions/addressing.md), line 3.
+
+```reaction
+when Registering.register (username, user)
+then
+  Notifying.setAddress (address: username, recipient: user)
+```
+
 ### reusable.accounts.identifying.Me
 
 Authored path: `reusable.accounts.identifying.Me`.
