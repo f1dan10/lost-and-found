@@ -9,12 +9,14 @@ import { type Db, MongoClient } from "mongodb";
 import type { LostFoundWire } from "../../generated/wire.ts";
 import { assembleLostFound } from "../application.ts";
 import { lostFoundPolicy } from "./http.ts";
+import { seedPlaces } from "./seed.ts";
 
 const port = Number(process.env.PORT ?? 3000);
 const publicOrigin = process.env.PUBLIC_ORIGIN ?? `http://localhost:${port}`;
 const site = `${import.meta.dir}/../../frontend/dist`;
 
 const database = await connect(process.env.MONGODB_URI);
+await seedPlaces(database);
 const application = assembleLostFound({ database });
 const gateway = createGateway<LostFoundWire>({ application });
 const handleApi = createHttpHandler({ application, gateway, policy: lostFoundPolicy(publicOrigin) });

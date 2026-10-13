@@ -29,6 +29,35 @@ Defined in [Authenticating](../design/concepts/Authenticating.md), line 1.
 - `Authenticating` — instance of `Authenticating` — [Lost&Found types](../design/types.md), line 8.
   - `User` is `Registering.User` — [Lost&Found types](../design/types.md), line 9.
 
+### Locating
+
+Defined in [Locating](../design/concepts/Locating.md), line 1.
+
+#### Actions
+
+- `addPlace(name: String, latitude: Number, longitude: Number) : returns (place: Place)`
+  - Refuses `INVALID_PLACE`: A place needs a name of 1 to 60 characters and a latitude and longitude on Earth.
+  - Refuses `PLACE_EXISTS`: There is already a place with that name.
+- `locate(item: Item, places: PlaceList, spot?: String) : returns (item: Item)`
+  - Refuses `NO_PLACES`: An item needs at least one place.
+  - Refuses `TOO_MANY_PLACES`: An item can be in at most 12 places.
+  - Refuses `INVALID_SPOT`: A spot must have 1 to 100 characters.
+  - Refuses `UNKNOWN_PLACE`: That place doesn't exist.
+  - Refuses `ALREADY_LOCATED`: This item already has a location.
+
+#### Queries
+
+- `_getItemsAt(place: Place) : many (item: Item)`
+- `_getPlacesOf(item: Item) : many (place: Place, name: String)`
+- `_getSpot(item: Item) : optional (spot: String)`
+- `_getPlaces() : many (place: Place, name: String, latitude: Number, longitude: Number)`
+- `_unknown(places: PlaceList) : many (place: Place)`
+
+#### Instances
+
+- `Locating` — instance of `Locating` — [Lost&Found types](../design/types.md), line 17.
+  - `Item` is `Reporting.Report` — [Lost&Found types](../design/types.md), line 18.
+
 ### Registering
 
 Defined in [Registering](../design/concepts/Registering.md), line 1.
