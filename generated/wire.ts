@@ -81,7 +81,7 @@ export type LostFoundWire = {
     output: {
       "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>>, ["item"]>]>>;
     };
-    error: { error: AppWideError | "ALREADY_LOCATED" | "INVALID_INPUT" | "INVALID_REPORT" | "INVALID_SPOT" | "NOT_SIGNED_IN" | "NO_PLACES" | "TOO_MANY_PLACES" | "UNKNOWN_PLACE" };
+    error: { error: AppWideError | "ALREADY_LOCATED" | "INVALID_INPUT" | "INVALID_REPORT" | "INVALID_SPOT" | "NOT_SIGNED_IN" | "NO_PLACES" | "TOO_MANY_PLACES" | "UNKNOWN_PLACE" | "UNKNOWN_RECIPIENT" };
   };
   "/reports/list": {
     input: {
@@ -180,7 +180,7 @@ export type LostFoundWireHttp = {
     output: {
       "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>>, ["item"]>]>>;
     };
-    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "UNAUTHORIZED" };
+    error: { error: HttpAppWideError | "CONFLICT" | "INTERNAL_ERROR" | "INVALID_REQUEST" | "UNAUTHORIZED" };
   };
   "/reports/list": {
     input: Record<string, never>;

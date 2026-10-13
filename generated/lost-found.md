@@ -276,6 +276,22 @@ then
   Notifying.setAddress (address: username, recipient: user)
 ```
 
+### matching.notifying.NotifyOwnerOfMatch
+
+Authored path: `matching.notifying.NotifyOwnerOfMatch`.
+- Covered by [Matching](../design/compositions/matching.md), line 3.
+
+```reaction
+when Locating.locate (item: found)
+where
+  Reporting._getReport (report: found) has (category, kind: "FOUND")
+  Locating._getPlacesOf (item: found) has (place)
+  Locating._getItemsAt (place) has (item: lost)
+  Reporting._getReport (report: lost) has (category, kind: "LOST", reporter, status: "OPEN")
+then
+  Notifying.notify (message: "An item matching your lost report was found.", recipient: reporter, subject: found)
+```
+
 ### reports.filing.FileReport
 
 Authored path: `reports.filing.FileReport`.
