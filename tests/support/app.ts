@@ -20,5 +20,10 @@ export async function startLostFound(observers: OperationalObserver[] = []) {
     return ok(await api.auth.register({ username, password: "correct horse" }));
   }
 
-  return { database, mailer, application, api, register };
+  /** Adds a place to choose from, such as "Building 2", and returns its id. */
+  async function addPlace(name: string) {
+    return ok(await application.concepts.Locating.addPlace({ name, latitude: 42.36, longitude: -71.09 })).place;
+  }
+
+  return { database, mailer, application, api, register, addPlace };
 }

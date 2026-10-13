@@ -5,6 +5,7 @@ import type { applicationConceptSet as ApplicationConceptSet } from "../src/conc
 
 type AtPath<T, P extends readonly string[]> = P extends readonly [infer H extends string, ...infer R extends string[]] ? H extends keyof T ? AtPath<T[H], R> : H extends `${number}` ? T extends readonly (infer Item)[] ? AtPath<Item, R> : never : never : T;
 type QueryRow<T> = T extends readonly (infer Row)[] ? Row : T;
+type AllOf<T extends readonly unknown[]> = T extends readonly [infer Head, ...infer Rest] ? Head & AllOf<Rest> : unknown;
 type OneOf<T extends readonly unknown[]> = T[number];
 type Jsonify<T> = T extends Date ? string : T extends null | boolean | number | string ? T : T extends (...args: never[]) => unknown ? never : T extends readonly (infer Item)[] ? Jsonify<Item>[] : T extends object ? { [K in keyof T]: Jsonify<T[K]> } : never;
 
@@ -53,6 +54,21 @@ export type LostFoundWire = {
     };
     error: { error: AppWideError | "INVALID_ADDRESS" | "INVALID_INPUT" | "INVALID_PASSWORD" | "INVALID_USERNAME" | "PASSWORD_SET" | "USERNAME_TAKEN" };
   };
+  "/reports/file": {
+    input: {
+      "category": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["file"]>[0], ["category"]>>;
+      "description": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["file"]>[0], ["description"]>>;
+      "kind": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["file"]>[0], ["kind"]>>;
+      "photo"?: Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["file"]>[0], ["photo"]>>;
+      "places": Jsonify<OneOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>[0], ["places"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_unknown"]>[0], ["places"]>]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
+      "spot"?: Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>[0], ["spot"]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>>, ["item"]>]>>;
+    };
+    error: { error: AppWideError | "ALREADY_LOCATED" | "INVALID_INPUT" | "INVALID_REPORT" | "INVALID_SPOT" | "NOT_SIGNED_IN" | "NO_PLACES" | "TOO_MANY_PLACES" | "UNKNOWN_PLACE" };
+  };
 };
 
 export type HttpAppWideError = never;
@@ -89,5 +105,19 @@ export type LostFoundWireHttp = {
       "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>[0], ["subject"]>>;
     };
     error: { error: HttpAppWideError | "CONFLICT" | "INTERNAL_ERROR" | "INVALID_REQUEST" };
+  };
+  "/reports/file": {
+    input: {
+      "category": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["file"]>[0], ["category"]>>;
+      "description": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["file"]>[0], ["description"]>>;
+      "kind": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["file"]>[0], ["kind"]>>;
+      "photo"?: Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["file"]>[0], ["photo"]>>;
+      "places": Jsonify<OneOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>[0], ["places"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_unknown"]>[0], ["places"]>]>>;
+      "spot"?: Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>[0], ["spot"]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["locate"]>>, ["item"]>]>>;
+    };
+    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "UNAUTHORIZED" };
   };
 };

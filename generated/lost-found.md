@@ -166,6 +166,16 @@ Defined in [Sessioning](../design/concepts/Sessioning.md), line 1.
 
 _Views name reusable conditions. Multiple `where` blocks are alternatives._
 
+### (places) has an unknown place
+
+Authored path: `reports.filing.hasUnknownPlace`.
+- Covered by [Reports](../design/compositions/reports.md), line 3.
+
+```view
+(places) has an unknown place — inputs (places); outputs (); bindings ()
+  where Locating._unknown (places)
+```
+
 ### (report) is an open found report
 
 Authored path: `access.permissions.isOpenFound`.
@@ -217,6 +227,76 @@ Authored path: `addressing.giving.GiveAddress`.
 when Registering.register (username, user)
 then
   Notifying.setAddress (address: username, recipient: user)
+```
+
+### reports.filing.FileReport
+
+Authored path: `reports.filing.FileReport`.
+- Covered by [Reports](../design/compositions/reports.md), line 3.
+- Covered by [Reports](../design/compositions/reports.md), line 8.
+
+```reaction
+when RequestBoundary.request (category, description, kind, path: "/reports/file", photo, places, requestId, session, spot)
+then
+  Sessioning.use (session)
+```
+
+### reports.filing.FileReport:filed#2
+
+Authored path: `reports.filing.FileReport`.
+- Covered by [Reports](../design/compositions/reports.md), line 3.
+- Covered by [Reports](../design/compositions/reports.md), line 8.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by reports.filing.FileReport
+where
+  earlier, RequestBoundary.request (category, description, kind, path: "/reports/file", photo, places, requestId, session, spot)
+  no view "(places) has an unknown place" with (places)
+then
+  Reporting.file (category, description, kind, photo, reporter: user)
+```
+
+### reports.filing.FileReport:filed#3
+
+Authored path: `reports.filing.FileReport`.
+- Covered by [Reports](../design/compositions/reports.md), line 3.
+- Covered by [Reports](../design/compositions/reports.md), line 8.
+
+```reaction
+when Reporting.file (category, description, kind, photo, reporter: user, report), asked by reports.filing.FileReport:filed#2
+where
+  earlier, RequestBoundary.request (category, description, kind, path: "/reports/file", photo, places, requestId, session, spot)
+then
+  Locating.locate (item: report, places, spot)
+```
+
+### reports.filing.FileReport:filed#4
+
+Authored path: `reports.filing.FileReport`.
+- Covered by [Reports](../design/compositions/reports.md), line 3.
+- Covered by [Reports](../design/compositions/reports.md), line 8.
+
+```reaction
+when Locating.locate (item: report, places, spot), asked by reports.filing.FileReport:filed#3
+where
+  earlier, RequestBoundary.request (category, description, kind, path: "/reports/file", photo, places, requestId, session, spot)
+then
+  RequestBoundary.respond (report, requestId)
+```
+
+### reports.filing.FileReport:unknown-place#2
+
+Authored path: `reports.filing.FileReport`.
+- Covered by [Reports](../design/compositions/reports.md), line 3.
+- Covered by [Reports](../design/compositions/reports.md), line 8.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by reports.filing.FileReport
+where
+  earlier, RequestBoundary.request (category, description, kind, path: "/reports/file", photo, places, requestId, session, spot)
+  view "(places) has an unknown place" with (places)
+then
+  RequestBoundary.respond (error: "UNKNOWN_PLACE", requestId)
 ```
 
 ### reusable.accounts.identifying.Me
@@ -405,3 +485,4 @@ not listed here have no explicit input contract.
 - `/auth/logout` — requires `session`
 - `/auth/me` — requires `session`
 - `/auth/register` — requires `password`, `username`
+- `/reports/file` — requires `session`, `kind`, `category`, `description`, `places`; fills `photo` with null when absent; fills `spot` with null when absent
