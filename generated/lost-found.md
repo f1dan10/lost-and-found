@@ -162,6 +162,30 @@ Defined in [Sessioning](../design/concepts/Sessioning.md), line 1.
 - `Sessioning` — instance of `Sessioning` — [Lost&Found types](../design/types.md), line 11.
   - `Subject` is `Registering.User` — [Lost&Found types](../design/types.md), line 12.
 
+## Views
+
+_Views name reusable conditions. Multiple `where` blocks are alternatives._
+
+### (report) is an open found report
+
+Authored path: `access.permissions.isOpenFound`.
+- Covered by [Access](../design/compositions/access.md), line 7.
+
+```view
+(report) is an open found report — inputs (report); outputs (); bindings ()
+  where Reporting._getReport (report) has (kind: "FOUND", status: "OPEN")
+```
+
+### (user) owns (report)
+
+Authored path: `access.permissions.owns`.
+- Covered by [Access](../design/compositions/access.md), line 5.
+
+```view
+(user) owns (report) — inputs (user, report); outputs (); bindings ()
+  where Reporting._getReport (report) has (reporter: user)
+```
+
 ## Reactions
 
 ### DeliverFaultToAsker

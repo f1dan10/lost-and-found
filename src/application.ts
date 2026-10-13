@@ -1,6 +1,7 @@
 import { assemble, type LogSink, type OperationalObserver } from "@mit-sdg/sync-engine/assembly";
 import type { Db } from "mongodb";
 import type { Mailer } from "./concepts/Notifying/mailer.ts";
+import { composition as access } from "./compositions/access.ts";
 import { composition as accounts } from "./compositions/reusable/accounts.ts";
 import { composition as passwords } from "./compositions/reusable/passwords.ts";
 import { applicationConceptSet } from "./concepts.ts";
@@ -14,6 +15,6 @@ export function assembleLostFound(
     conceptSet: applicationConceptSet,
     instances: applicationConceptSet.implementations("mongo", resources),
     ...options,
-    composition: { reusable: { accounts, passwords } },
+    composition: { reusable: { accounts, passwords }, access },
   });
 }
