@@ -1,8 +1,9 @@
 import { type EndpointValidator, endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
-import { no, view, where } from "@mit-sdg/sync-engine/language";
+import { each, former, no, view, whether, where } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
+import { textInput } from "./reusable/inputs.ts";
 
-const { Sessioning, Reporting, Locating } = concepts;
+const { Registering, Sessioning, Reporting, Locating } = concepts;
 
 /** A report is filed in 1 to 12 places, and refused actions aren't undone, so the places are checked before anything is filed. */
 const reportInput: EndpointValidator = (value) => {
@@ -48,6 +49,62 @@ const FileReport = endpoint(
   },
 );
 
+// Listing
+
+/**
+ * The open reports of a kind, newest first, with who filed each and where it is. The spot and the photo are null
+ * when a report has none. The photo is inlined for Alpha, where the frontend resizes it to about 400 px; a later
+ * version may serve photos from their own endpoint.
+ */
+export const reportCards = former(
+  "the open reports of (kind)",
+  ({ kind }, { report, category, description, filedAt, reporter, username, place, name, spot, photo }) =>
+    each(Reporting._getOpen({ kind }).is({ report }))
+      .where(
+        Reporting._getReport({ report }).is({ category, description, filedAt, reporter }),
+        Registering._username({ user: reporter }).is({ username }),
+        whether(Locating._getSpot({ item: report }).is({ spot })),
+        whether(Reporting._getPhoto({ report }).is({ photo })),
+      )
+      .form({
+        report,
+        category,
+        description,
+        filedAt,
+        reporter,
+        username,
+        spot,
+        photo,
+        places: each(Locating._getPlacesOf({ item: report }).is({ place, name })).form({ place, name }),
+      }),
+);
+
+/** Every place a report can be in, by name. */
+export const allPlaces = former(
+  "every place",
+  ({}, { place, name, latitude, longitude }) =>
+    each(Locating._getPlaces({}).is({ place, name, latitude, longitude })).form({ place, name, latitude, longitude }),
+);
+
+const ListReports = endpoint(
+  "/reports/list",
+  ({ session, user }) =>
+    receive({ session })
+      .then(Sessioning.use({ session }).responds({ subject: user }))
+      .then(respond({ found: reportCards({ kind: "FOUND" }), lost: reportCards({ kind: "LOST" }) })),
+  { validators: { input: textInput } },
+);
+
+const ListPlaces = endpoint(
+  "/places/list",
+  ({ session, user }) =>
+    receive({ session })
+      .then(Sessioning.use({ session }).responds({ subject: user }))
+      .then(respond({ places: allPlaces({}) })),
+  { validators: { input: textInput } },
+);
+
 export const composition = {
   filing: { hasUnknownPlace, FileReport },
+  listing: { reportCards, allPlaces, ListReports, ListPlaces },
 };

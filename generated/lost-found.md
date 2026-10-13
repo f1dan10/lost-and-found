@@ -196,6 +196,53 @@ Authored path: `access.permissions.owns`.
   where Reporting._getReport (report) has (reporter: user)
 ```
 
+## Formers
+
+_Formers name result shapes evaluated when asked. The source former owns_
+_the authored explanation; this section records the generated shape._
+
+### every place
+
+Authored path: `reports.listing.allPlaces`.
+- Covered by [Reports](../design/compositions/reports.md), line 19.
+
+```former
+Former "every place" — inputs (); bindings (place, name, latitude, longitude); promises exactly one record — forms:
+  each Locating._getPlaces () has (latitude, longitude, name, place)
+    form a record of
+      latitude
+      longitude
+      name
+      place
+```
+
+### the open reports of (kind)
+
+Authored path: `reports.listing.reportCards`.
+- Covered by [Reports](../design/compositions/reports.md), line 13.
+
+```former
+Former "the open reports of (kind)" — inputs (kind); bindings (report, category, description, filedAt, reporter, username, place, name, spot, photo); promises exactly one record — forms:
+  each Reporting._getOpen (kind) has (report)
+    where Reporting._getReport (report) has (category, description, filedAt, reporter)
+    where Registering._username (user: reporter) has (username)
+    where whether Locating._getSpot (item: report) has (spot)
+    where whether Reporting._getPhoto (report) has (photo)
+    form a record of
+      category
+      description
+      filedAt
+      photo
+      places: each Locating._getPlacesOf (item: report) has (name, place)
+        form a record of
+          name
+          place
+      report
+      reporter
+      spot
+      username
+```
+
 ## Reactions
 
 ### DeliverFaultToAsker
@@ -297,6 +344,58 @@ where
   view "(places) has an unknown place" with (places)
 then
   RequestBoundary.respond (error: "UNKNOWN_PLACE", requestId)
+```
+
+### reports.listing.ListPlaces
+
+Authored path: `reports.listing.ListPlaces`.
+- Covered by [Reports](../design/compositions/reports.md), line 19.
+- Covered by [Reports](../design/compositions/reports.md), line 22.
+
+```reaction
+when RequestBoundary.request (path: "/places/list", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### reports.listing.ListPlaces#2
+
+Authored path: `reports.listing.ListPlaces`.
+- Covered by [Reports](../design/compositions/reports.md), line 19.
+- Covered by [Reports](../design/compositions/reports.md), line 22.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by reports.listing.ListPlaces
+where
+  earlier, RequestBoundary.request (path: "/places/list", requestId, session)
+then
+  RequestBoundary.respond (places: former "every place", requestId)
+```
+
+### reports.listing.ListReports
+
+Authored path: `reports.listing.ListReports`.
+- Covered by [Reports](../design/compositions/reports.md), line 13.
+- Covered by [Reports](../design/compositions/reports.md), line 16.
+
+```reaction
+when RequestBoundary.request (path: "/reports/list", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### reports.listing.ListReports#2
+
+Authored path: `reports.listing.ListReports`.
+- Covered by [Reports](../design/compositions/reports.md), line 13.
+- Covered by [Reports](../design/compositions/reports.md), line 16.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by reports.listing.ListReports
+where
+  earlier, RequestBoundary.request (path: "/reports/list", requestId, session)
+then
+  RequestBoundary.respond (found: former "the open reports of (kind)" with (kind: "FOUND"), lost: former "the open reports of (kind)" with (kind: "LOST"), requestId)
 ```
 
 ### reusable.accounts.identifying.Me
@@ -485,4 +584,6 @@ not listed here have no explicit input contract.
 - `/auth/logout` — requires `session`
 - `/auth/me` — requires `session`
 - `/auth/register` — requires `password`, `username`
+- `/places/list` — requires `session`
 - `/reports/file` — requires `session`, `kind`, `category`, `description`, `places`; fills `photo` with null when absent; fills `spot` with null when absent
+- `/reports/list` — requires `session`
