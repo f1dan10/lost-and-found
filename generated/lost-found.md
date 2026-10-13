@@ -58,6 +58,29 @@ Defined in [Locating](../design/concepts/Locating.md), line 1.
 - `Locating` — instance of `Locating` — [Lost&Found types](../design/types.md), line 17.
   - `Item` is `Reporting.Report` — [Lost&Found types](../design/types.md), line 18.
 
+### Notifying
+
+Defined in [Notifying](../design/concepts/Notifying.md), line 1.
+
+#### Actions
+
+- `setAddress(recipient: Recipient, address: String) : returns (recipient: Recipient)`
+  - Refuses `INVALID_ADDRESS`: An address can't be blank.
+- `notify(recipient: Recipient, message: String, subject: Subject) : returns (notification: Notification)`
+  - Refuses `UNKNOWN_RECIPIENT`: That person has no address.
+- `markRead(notification: Notification) : returns (notification: Notification)`
+  - Refuses `NOTIFICATION_NOT_FOUND`: There is no such notification.
+
+#### Queries
+
+- `_getUnread(recipient: Recipient) : many (notification: Notification, message: String, subject: Subject, sentAt: DateTime)`
+
+#### Instances
+
+- `Notifying` — instance of `Notifying` — [Lost&Found types](../design/types.md), line 20.
+  - `Recipient` is `Registering.User` — [Lost&Found types](../design/types.md), line 21.
+  - `Subject` is `Reporting.Report` — [Lost&Found types](../design/types.md), line 22.
+
 ### Registering
 
 Defined in [Registering](../design/concepts/Registering.md), line 1.

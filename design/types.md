@@ -1,6 +1,6 @@
 # Lost&Found types
 
-Every person in Lost&Found is a Registering user. That user is the one who has a password in Authenticating, the one a session belongs to, and the one who files a report. Every item that is somewhere is a report, placed where it was found or may have been lost.
+Every person in Lost&Found is a Registering user. That user is the one who has a password in Authenticating, the one a session belongs to, and the one who files a report. The one who is notified is a user too, and a notice is about a report. Every item that is somewhere is a report, placed where it was found or may have been lost.
 
 ```instances
 instantiate Registering
@@ -16,4 +16,8 @@ instantiate Reporting with
 
 instantiate Locating with
   Item is Reporting.Report
+
+instantiate Notifying with
+  Recipient is Registering.User
+  Subject is Reporting.Report
 ```

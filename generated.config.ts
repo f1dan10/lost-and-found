@@ -1,13 +1,14 @@
 import { httpWire } from "@mit-sdg/sync-engine-http/tooling";
 import { MongoClient } from "mongodb";
 import { assembleLostFound } from "./src/application.ts";
+import { MemoryMailer } from "./src/concepts/Notifying/mailer.ts";
 import { lostFoundPolicy } from "./src/host/http.ts";
 
 // `sync-engine check` reads only the assembly's shape and calls no concept, so this client never connects.
 const database = new MongoClient("mongodb://localhost").db("lostfound");
 
 export default {
-  assemble: () => assembleLostFound({ database }),
+  assemble: () => assembleLostFound({ database, mailer: new MemoryMailer() }),
   title: "Lost&Found",
   wireName: "LostFoundWire",
   design: {
