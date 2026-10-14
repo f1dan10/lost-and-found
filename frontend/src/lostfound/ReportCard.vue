@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useSession } from "../reusable/session.ts";
 import Icon from "../reusable/ui/Icon.vue";
 import { categoryIcon, categoryLabel, timeAgo } from "./format.ts";
@@ -11,11 +11,20 @@ const { me } = useSession();
 const { highlight } = useLostFound();
 
 /** Cards carry the reporter's username, so a card is mine when it matches the signed-in name. */
+const root = ref<HTMLElement | null>(null);
+
+/** Scrolls the card into view when it is the one being pointed at, such as from a notice. */
+function showIfHighlighted() {
+  if (highlight.value === props.card.report) void nextTick(() => root.value?.scrollIntoView({ block: "center", behavior: "smooth" }));
+}
+onMounted(showIfHighlighted);
+watch(highlight, showIfHighlighted);
+
 const mine = computed(() => props.card.username === me.value?.username);
 </script>
 
 <template>
-  <article class="card report" :class="[kind, { highlighted: highlight === card.report }]">
+  <article ref="root" class="card report" :class="[kind, { highlighted: highlight === card.report }]">
     <img v-if="card.photo" class="photo" :src="card.photo" :alt="`${categoryLabel(card.category)}: ${card.description}`" />
     <div v-else class="photo none" :class="kind"><Icon :name="categoryIcon(card.category)" :size="40" /></div>
     <div class="text">

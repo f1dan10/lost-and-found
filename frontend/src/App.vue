@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import LostFoundPage from "./LostFoundPage.vue";
+import NotificationBell from "./lostfound/NotificationBell.vue";
 import PasswordForm from "./reusable/PasswordForm.vue";
 import SignIn from "./reusable/SignIn.vue";
 import { useSession } from "./reusable/session.ts";
@@ -17,8 +18,7 @@ onMounted(load);
   <header v-if="me" class="topbar">
     <span class="brand"><span class="logo"><Icon name="logo" :size="20" /></span>Lost&amp;Found</span>
     <div class="actions">
-      <!-- The notification bell goes here. -->
-      <div class="bell-slot" />
+      <NotificationBell />
       <Menu label="Account">
         <template #button><Avatar :username="me.username" :size="36" /></template>
         <p class="signed-in">Signed in as <strong>{{ me.username }}</strong></p>
