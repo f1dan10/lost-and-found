@@ -186,6 +186,16 @@ Authored path: `access.permissions.isOpenFound`.
   where Reporting._getReport (report) has (kind: "FOUND", status: "OPEN")
 ```
 
+### (user) has the unread (notification)
+
+Authored path: `notifications.reading.hasUnread`.
+- Covered by [Notifications](../design/compositions/notifications.md), line 15.
+
+```view
+(user) has the unread (notification) — inputs (user, notification); outputs (); bindings ()
+  where Notifying._getUnread (recipient: user) has (notification)
+```
+
 ### (user) owns (report)
 
 Authored path: `access.permissions.owns`.
@@ -241,6 +251,27 @@ Former "the open reports of (kind)" — inputs (kind); bindings (report, categor
       reporter
       spot
       username
+```
+
+### the unread notifications of (user)
+
+Authored path: `notifications.listing.notificationRows`.
+- Covered by [Notifications](../design/compositions/notifications.md), line 7.
+
+```former
+Former "the unread notifications of (user)" — inputs (user); bindings (notification, message, subject, sentAt, category, description, claimant, claimedBy); promises exactly one record — forms:
+  each Notifying._getUnread (recipient: user) has (message, notification, sentAt, subject)
+    where Reporting._getReport (report: subject) has (category, description)
+    where whether Claiming._getClaimant (item: subject) has (claimant)
+    where whether Registering._username (user: claimant) has (username: claimedBy)
+    form a record of
+      category
+      claimedBy
+      description
+      message
+      notification
+      sentAt
+      subject
 ```
 
 ## Reactions
@@ -387,6 +418,88 @@ where
   Reporting._getReport (report: lost) has (category, kind: "LOST", reporter, status: "OPEN")
 then
   Notifying.notify (message: "An item matching your lost report was found.", recipient: reporter, subject: found)
+```
+
+### notifications.listing.ListNotifications
+
+Authored path: `notifications.listing.ListNotifications`.
+- Covered by [Notifications](../design/compositions/notifications.md), line 7.
+- Covered by [Notifications](../design/compositions/notifications.md), line 10.
+
+```reaction
+when RequestBoundary.request (path: "/notifications/list", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### notifications.listing.ListNotifications#2
+
+Authored path: `notifications.listing.ListNotifications`.
+- Covered by [Notifications](../design/compositions/notifications.md), line 7.
+- Covered by [Notifications](../design/compositions/notifications.md), line 10.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by notifications.listing.ListNotifications
+where
+  earlier, RequestBoundary.request (path: "/notifications/list", requestId, session)
+then
+  RequestBoundary.respond (notifications: former "the unread notifications of (user)" with (user), requestId)
+```
+
+### notifications.reading.MarkRead
+
+Authored path: `notifications.reading.MarkRead`.
+- Covered by [Notifications](../design/compositions/notifications.md), line 15.
+- Covered by [Notifications](../design/compositions/notifications.md), line 18.
+
+```reaction
+when RequestBoundary.request (notification, path: "/notifications/read", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### notifications.reading.MarkRead:mine#2
+
+Authored path: `notifications.reading.MarkRead`.
+- Covered by [Notifications](../design/compositions/notifications.md), line 15.
+- Covered by [Notifications](../design/compositions/notifications.md), line 18.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by notifications.reading.MarkRead
+where
+  earlier, RequestBoundary.request (notification, path: "/notifications/read", requestId, session)
+  view "(user) has the unread (notification)" with (notification, user)
+then
+  Notifying.markRead (notification)
+```
+
+### notifications.reading.MarkRead:mine#3
+
+Authored path: `notifications.reading.MarkRead`.
+- Covered by [Notifications](../design/compositions/notifications.md), line 15.
+- Covered by [Notifications](../design/compositions/notifications.md), line 18.
+
+```reaction
+when Notifying.markRead (notification), asked by notifications.reading.MarkRead:mine#2
+where
+  earlier, RequestBoundary.request (notification, path: "/notifications/read", requestId, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### notifications.reading.MarkRead:refused#2
+
+Authored path: `notifications.reading.MarkRead`.
+- Covered by [Notifications](../design/compositions/notifications.md), line 15.
+- Covered by [Notifications](../design/compositions/notifications.md), line 18.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by notifications.reading.MarkRead
+where
+  earlier, RequestBoundary.request (notification, path: "/notifications/read", requestId, session)
+  no view "(user) has the unread (notification)" with (notification, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
 ### reports.filing.FileReport
@@ -697,6 +810,8 @@ not listed here have no explicit input contract.
 - `/auth/logout` — requires `session`
 - `/auth/me` — requires `session`
 - `/auth/register` — requires `password`, `username`
+- `/notifications/list` — requires `session`
+- `/notifications/read` — requires `notification`, `session`
 - `/places/list` — requires `session`
 - `/reports/claim` — requires `report`, `session`
 - `/reports/file` — requires `session`, `kind`, `category`, `description`, `places`; fills `photo` with null when absent; fills `spot` with null when absent

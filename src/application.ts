@@ -5,6 +5,7 @@ import { composition as addressing } from "./compositions/addressing.ts";
 import { composition as reports } from "./compositions/reports.ts";
 import { composition as matching } from "./compositions/matching.ts";
 import { composition as claims } from "./compositions/claims.ts";
+import { composition as notifications } from "./compositions/notifications.ts";
 import { composition as access } from "./compositions/access.ts";
 import { composition as accounts } from "./compositions/reusable/accounts.ts";
 import { composition as passwords } from "./compositions/reusable/passwords.ts";
@@ -19,6 +20,6 @@ export function assembleLostFound(
     conceptSet: applicationConceptSet,
     instances: applicationConceptSet.implementations("mongo", resources),
     ...options,
-    composition: { reusable: { accounts, passwords }, access, addressing, reports, matching, claims },
+    composition: { reusable: { accounts, passwords }, access, addressing, reports, matching, claims, notifications },
   });
 }
