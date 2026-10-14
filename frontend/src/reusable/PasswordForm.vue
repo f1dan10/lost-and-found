@@ -49,7 +49,7 @@ function switchMode() {
         required
         :pattern="creating ? '[A-Za-z0-9_\\-]{3,32}' : undefined"
       />
-      <span v-if="creating" class="hint">3 to 32 letters, digits, _ or -</span>
+      <span v-if="creating" class="hint">Your MIT username, 3 to 32 letters, digits, _ or -</span>
     </label>
     <label class="field">
       Password
