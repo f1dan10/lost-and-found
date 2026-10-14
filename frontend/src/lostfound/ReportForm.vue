@@ -124,7 +124,7 @@ async function submit() {
         </div>
         <label v-else class="button outline pick">
           <Icon name="camera" :size="16" />Choose a photo
-          <input type="file" accept="image/*" hidden @change="choosePhoto" />
+          <input class="file" type="file" accept="image/*" @change="choosePhoto" />
         </label>
       </div>
 
@@ -185,7 +185,19 @@ async function submit() {
   object-fit: cover;
 }
 .pick {
+  position: relative;
   align-self: flex-start;
   cursor: pointer;
+}
+/* Hidden from sight but still reachable by keyboard; the label around it shows the focus. */
+.file {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.pick:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 </style>

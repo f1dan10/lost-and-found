@@ -62,6 +62,8 @@ const tabs = computed<{ id: Tab; label: string; count: number }[]>(() => [
   gap: var(--space-4);
   max-width: 1168px;
   margin: 0 auto;
+  /* Room below the last card for the floating add button. */
+  padding-bottom: 88px;
 }
 .banner {
   display: flex;
@@ -82,6 +84,7 @@ const tabs = computed<{ id: Tab; label: string; count: number }[]>(() => [
 }
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 .tab {
