@@ -276,6 +276,103 @@ then
   Notifying.setAddress (address: username, recipient: user)
 ```
 
+### claims.claiming.ClaimReport
+
+Authored path: `claims.claiming.ClaimReport`.
+- Covered by [Claims](../design/compositions/claims.md), line 3.
+- Covered by [Claims](../design/compositions/claims.md), line 6.
+
+```reaction
+when RequestBoundary.request (path: "/reports/claim", report, requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### claims.claiming.ClaimReport:claimed#2
+
+Authored path: `claims.claiming.ClaimReport`.
+- Covered by [Claims](../design/compositions/claims.md), line 3.
+- Covered by [Claims](../design/compositions/claims.md), line 6.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by claims.claiming.ClaimReport
+where
+  earlier, RequestBoundary.request (path: "/reports/claim", report, requestId, session)
+  view "(report) is an open found report" with (report)
+  no view "(user) owns (report)" with (report, user)
+then
+  Claiming.claim (claimant: user, item: report)
+```
+
+### claims.claiming.ClaimReport:claimed#3
+
+Authored path: `claims.claiming.ClaimReport`.
+- Covered by [Claims](../design/compositions/claims.md), line 3.
+- Covered by [Claims](../design/compositions/claims.md), line 6.
+
+```reaction
+when Claiming.claim (claimant: user, item: report), asked by claims.claiming.ClaimReport:claimed#2
+where
+  earlier, RequestBoundary.request (path: "/reports/claim", report, requestId, session)
+then
+  RequestBoundary.respond (report, requestId)
+```
+
+### claims.claiming.ClaimReport:own#2
+
+Authored path: `claims.claiming.ClaimReport`.
+- Covered by [Claims](../design/compositions/claims.md), line 3.
+- Covered by [Claims](../design/compositions/claims.md), line 6.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by claims.claiming.ClaimReport
+where
+  earlier, RequestBoundary.request (path: "/reports/claim", report, requestId, session)
+  view "(report) is an open found report" with (report)
+  view "(user) owns (report)" with (report, user)
+then
+  RequestBoundary.respond (error: "CLAIMING_OWN_REPORT", requestId)
+```
+
+### claims.claiming.ClaimReport:refused#2
+
+Authored path: `claims.claiming.ClaimReport`.
+- Covered by [Claims](../design/compositions/claims.md), line 3.
+- Covered by [Claims](../design/compositions/claims.md), line 6.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by claims.claiming.ClaimReport
+where
+  earlier, RequestBoundary.request (path: "/reports/claim", report, requestId, session)
+  no view "(report) is an open found report" with (report)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### claims.claiming.NotifyFinderOfClaim
+
+Authored path: `claims.claiming.NotifyFinderOfClaim`.
+- Covered by [Claims](../design/compositions/claims.md), line 9.
+
+```reaction
+when Claiming.claim (item: report)
+where
+  Reporting._getReport (report) has (reporter)
+then
+  Notifying.notify (message: "Your found item was claimed.", recipient: reporter, subject: report)
+```
+
+### claims.claiming.ResolveOnClaim
+
+Authored path: `claims.claiming.ResolveOnClaim`.
+- Covered by [Claims](../design/compositions/claims.md), line 9.
+
+```reaction
+when Claiming.claim (item: report)
+then
+  Reporting.resolve (report)
+```
+
 ### matching.notifying.NotifyOwnerOfMatch
 
 Authored path: `matching.notifying.NotifyOwnerOfMatch`.
@@ -601,5 +698,6 @@ not listed here have no explicit input contract.
 - `/auth/me` — requires `session`
 - `/auth/register` — requires `password`, `username`
 - `/places/list` — requires `session`
+- `/reports/claim` — requires `report`, `session`
 - `/reports/file` — requires `session`, `kind`, `category`, `description`, `places`; fills `photo` with null when absent; fills `spot` with null when absent
 - `/reports/list` — requires `session`

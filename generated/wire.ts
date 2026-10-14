@@ -68,6 +68,16 @@ export type LostFoundWire = {
     };
     error: { error: AppWideError | "INVALID_INPUT" | "NOT_SIGNED_IN" };
   };
+  "/reports/claim": {
+    input: {
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>>, ["item"]>]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>>, ["item"]>]>>;
+    };
+    error: { error: AppWideError | "ALREADY_CLAIMED" | "CLAIMING_OWN_REPORT" | "INVALID_INPUT" | "NOT_FOUND" | "NOT_OPEN" | "NOT_SIGNED_IN" | "REPORT_NOT_FOUND" | "UNKNOWN_RECIPIENT" };
+  };
   "/reports/file": {
     input: {
       "category": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["file"]>[0], ["category"]>>;
@@ -167,6 +177,15 @@ export type LostFoundWireHttp = {
       }[];
     };
     error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
+  };
+  "/reports/claim": {
+    input: {
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>>, ["item"]>]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>>, ["item"]>]>>;
+    };
+    error: { error: HttpAppWideError | "CONFLICT" | "FORBIDDEN" | "INTERNAL_ERROR" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
   };
   "/reports/file": {
     input: {
