@@ -14,3 +14,23 @@ Personal project for 6.1040 Software Design, Fall 2026.
    - [Note on the roles of the concepts](design/p1/concepts.md#roles-of-the-concepts)
 4. [UI sketches](design/p1/ui-sketches.md)
 5. [User journey](design/p1/user-journey.md)
+
+## P2: Alpha
+
+1. [Alpha plan](design/alpha-plan.md)
+2. [Alpha user journey](design/alpha-journey.md)
+3. [Design notes](design/notes.md)
+4. Concept specifications are in [design/concepts](design/concepts), compositions in [design/compositions](design/compositions), and the types each concept is instantiated with in [design/types.md](design/types.md).
+
+### Run it
+
+You need [Bun](https://bun.sh) and a MongoDB server.
+
+```
+bun install && bun install --cwd frontend
+MONGODB_URI=mongodb://localhost:27017/lostfound bun run build && MONGODB_URI=mongodb://localhost:27017/lostfound bun run start
+```
+
+Open http://localhost:3000. To try the journey, sign up as one person in a normal window and as another in a private window. Without `MONGODB_URI`, the server keeps its data in memory and loses it when it stops. Email notices are printed to the server's console.
+
+`bun run test` runs the tests, and `bun run check` checks the specifications against the code and runs TypeScript.
