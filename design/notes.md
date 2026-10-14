@@ -1,6 +1,19 @@
 # Design notes
 
-Notes for the Alpha (P2). The plan is in [alpha-plan.md](alpha-plan.md) and the journey is in [alpha-journey.md](alpha-journey.md). The app runs locally: the server serves the Vue app and the API, and the data is in MongoDB.
+Notes for the Alpha (P2). The journey is in [alpha-journey.md](alpha-journey.md), and the screen recording is [demo.mp4](demo.mp4). The app runs locally: the server serves the Vue app and the API, and the data is in MongoDB.
+
+## Plan
+
+I built the Alpha in six steps, each small enough to test before the next one started, and I committed after each one.
+
+1. **Set up and sign in.** Copy the project layout and password sign-in from ConceptBox. *Evaluated by:* the sign-in tests, and registering and logging in with `curl`.
+2. **Four concepts, one at a time.** Reporting, Locating, Notifying, and Claiming, each with a specification, a class, and a test. *Evaluated by:* a test for each concept that follows its principle, plus a test for each refusal.
+3. **Compositions.** The endpoints and the reactions that connect the concepts. *Evaluated by:* a test for each composition, including who is refused.
+4. **The whole journey in one test.** Tamar and Tom, from an empty database to the claim. *Evaluated by:* that test passing, and its trace showing the actions in the order I expect.
+5. **The Vue frontend.** *Evaluated by:* walking the journey in two browser windows, one signed in as each person.
+6. **Recording and notes.** *Evaluated by:* a recording of at most two minutes that shows the journey working.
+
+The recording follows the journey from Tamar's lost report to the notice Tom receives when she claims his item. It ends there, so Tamar's walk to Building 2 is not shown, and the app has nothing to show her at that point (see "What the claimer sees after a claim" under P3).
 
 ## Where things are
 

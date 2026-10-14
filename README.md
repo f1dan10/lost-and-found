@@ -17,9 +17,9 @@ Personal project for 6.1040 Software Design, Fall 2026.
 
 ## P2: Alpha
 
-1. [Alpha plan](design/alpha-plan.md)
-2. [Alpha user journey](design/alpha-journey.md)
-3. [Design notes](design/notes.md)
+1. [Alpha user journey](design/alpha-journey.md)
+2. [Design notes](design/notes.md), which include the [plan](design/notes.md#plan)
+3. [Screen recording of the journey](design/demo.mp4), about two minutes
 4. Concept specifications are in [design/concepts](design/concepts), compositions in [design/compositions](design/compositions), and the types each concept is instantiated with in [design/types.md](design/types.md).
 
 ### Run it
