@@ -27,7 +27,10 @@ export function printTrace(): LogSink {
         console.log(`   ${call.concept}.${call.action}(${show(call.input)}) refuses ${show(outcome.error)}    [${call.by}]`);
       } else {
         if (call.action === "register") names.set(String(outcome.value.user), String(call.input.username));
-        if (call.action === "start" && call.concept === "Storing") names.set(String(outcome.value.file), String(call.input.name));
+        if (call.action === "addPlace") names.set(String(outcome.value.place), String(call.input.name));
+        if (call.action === "file" && call.concept === "Reporting") {
+          names.set(String(outcome.value.report), `${String(call.input.kind).toLowerCase()} ${String(call.input.category).toLowerCase()}`);
+        }
         console.log(`   ${call.concept}.${call.action}(${show(call.input)}) -> ${show(outcome.value)}    [${call.by}]`);
       }
       return undefined;
