@@ -52,8 +52,8 @@ function choose(place: string) {
       >
         <span class="name">{{ tile.name }}</span>
         <span class="counts">
-          <span class="count found"><Icon name="pin" :size="16" />{{ tile.found }}</span>
-          <span class="count lost"><Icon name="pin" :size="16" />{{ tile.lost }}</span>
+          <span class="count found" aria-hidden="true"><Icon name="pin" :size="16" />{{ tile.found }} found</span>
+          <span class="count lost" aria-hidden="true"><Icon name="search" :size="16" />{{ tile.lost }} lost</span>
         </span>
         <span class="sr">{{ tile.found }} found, {{ tile.lost }} lost</span>
       </button>
@@ -106,7 +106,8 @@ function choose(place: string) {
 }
 .counts {
   display: flex;
-  gap: var(--space-4);
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
 }
 .count {
   display: inline-flex;

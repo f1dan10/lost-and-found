@@ -13,11 +13,11 @@
   --color-danger-soft: #fdf1ef;
   --color-tip: #1e1f2b;
 
-  /* Found items are green and lost items are red, as in the P1 sketches. */
-  --color-found: #15803d;
-  --color-found-soft: #e8f6ec;
-  --color-lost: #c0262d;
-  --color-lost-soft: #fdecec;
+  /* Found items are blue and lost items are orange, chosen to be colour-blind safe. Colour is never the only cue: a label and an icon go with it. */
+  --color-found: #0369a1;
+  --color-found-soft: #e0f2fe;
+  --color-lost: #c2410c;
+  --color-lost-soft: #fff1e3;
 
   /* Typography */
   --font-sans: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;

@@ -68,7 +68,7 @@ async function open(notice: Notification) {
   height: 18px;
   padding: 0 5px;
   border-radius: var(--radius-full);
-  background: var(--color-lost);
+  background: var(--color-danger);
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;

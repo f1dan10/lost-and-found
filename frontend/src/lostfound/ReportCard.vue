@@ -29,7 +29,8 @@ const mine = computed(() => props.card.username === me.value?.username);
     <div v-else class="photo none" :class="kind"><Icon :name="categoryIcon(card.category)" :size="40" /></div>
     <div class="text">
       <div class="chips">
-        <span class="chip" :class="kind">{{ categoryLabel(card.category) }}</span>
+        <span class="chip" :class="kind"><Icon :name="kind === 'found' ? 'pin' : 'search'" :size="12" />{{ kind === "found" ? "Found" : "Lost" }}</span>
+        <span class="chip category">{{ categoryLabel(card.category) }}</span>
         <span v-if="mine" class="chip mine">Your report</span>
       </div>
       <p class="description">{{ card.description }}</p>
@@ -87,7 +88,8 @@ const mine = computed(() => props.card.username === me.value?.username);
   flex-wrap: wrap;
   gap: var(--space-1);
 }
-.chip.place {
+.chip.place,
+.chip.category {
   background: var(--color-line);
   color: var(--color-text);
 }
