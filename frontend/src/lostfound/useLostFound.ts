@@ -25,6 +25,8 @@ const notifications = ref<Notification[]>([]);
 const tab = ref<Tab>("found");
 /** The report to point out on the screen, such as the one a notice is about. */
 const highlight = ref<ReportId | null>(null);
+/** False until the first refresh finishes, so the page can say "Loading…" instead of "Nothing found yet". */
+const loaded = ref(false);
 const error = ref<string | null>(null);
 /** True while `change` waits for a call and the refresh after it. */
 const working = ref(false);
@@ -60,6 +62,7 @@ async function refresh() {
   else places.value = where.places;
   if ("error" in notices) error.value = notices.error;
   else notifications.value = notices.notifications;
+  loaded.value = true;
 }
 
 /**
@@ -139,6 +142,7 @@ function reset() {
   notifications.value = [];
   tab.value = "found";
   highlight.value = null;
+  loaded.value = false;
   error.value = null;
   working.value = false;
 }
@@ -154,6 +158,7 @@ export function useLostFound() {
     notifications,
     tab,
     highlight,
+    loaded,
     error,
     working,
     call,

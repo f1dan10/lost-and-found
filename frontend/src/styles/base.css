@@ -10,3 +10,25 @@
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: var(--space-4);
 }
+
+/* A small rounded label, such as a category or a building. Add `found` or `lost` for the kind's color. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.chip.found {
+  background: var(--color-found-soft);
+  color: var(--color-found);
+}
+.chip.lost {
+  background: var(--color-lost-soft);
+  color: var(--color-lost);
+}
