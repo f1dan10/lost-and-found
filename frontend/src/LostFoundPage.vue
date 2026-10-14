@@ -2,10 +2,11 @@
 import { computed, onMounted, onUnmounted } from "vue";
 import Icon from "./reusable/ui/Icon.vue";
 import AddMenu from "./lostfound/AddMenu.vue";
+import BuildingBoard from "./lostfound/BuildingBoard.vue";
 import ReportList from "./lostfound/ReportList.vue";
 import { type Tab, useLostFound } from "./lostfound/useLostFound.ts";
 
-const { reports, places, tab, loaded, error, startPolling, reset } = useLostFound();
+const { reports, tab, loaded, error, startPolling, reset } = useLostFound();
 
 onMounted(startPolling);
 // Leaving the page means signing out or a session that ended: stop polling and forget the lists.
@@ -48,7 +49,7 @@ const tabs = computed<{ id: Tab; label: string; count: number }[]>(() => [
       </div>
       <ReportList v-if="tab === 'found'" :cards="reports.found" kind="found" />
       <ReportList v-else-if="tab === 'lost'" :cards="reports.lost" kind="lost" />
-      <p v-else class="muted">{{ places.length }} buildings. The board comes next.</p>
+      <BuildingBoard v-else />
     </template>
     <AddMenu />
   </section>
