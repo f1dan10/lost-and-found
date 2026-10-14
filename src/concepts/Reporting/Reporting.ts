@@ -48,7 +48,7 @@ export class ReportingConcept<Reporter extends string> {
     kind: Kind;
     category: Category;
     description: string;
-    photo?: string;
+    photo?: string | null;
   }) {
     const trimmed = typeof description === "string" ? description.trim() : "";
     if (
@@ -56,7 +56,7 @@ export class ReportingConcept<Reporter extends string> {
       !CATEGORIES.includes(category) ||
       trimmed.length === 0 ||
       description.length > MAX_DESCRIPTION ||
-      (photo !== undefined && (typeof photo !== "string" || photo.length > MAX_PHOTO))
+      (photo !== undefined && photo !== null && (typeof photo !== "string" || photo.length > MAX_PHOTO))
     ) {
       throw new InvalidReport(
         "A report needs a kind, a category, a description of 1 to 500 characters, and a photo that is not too large.",
@@ -69,7 +69,7 @@ export class ReportingConcept<Reporter extends string> {
       kind,
       category,
       description,
-      ...(photo === undefined ? {} : { photo }),
+      ...(photo === undefined || photo === null ? {} : { photo }),
       filedAt: this.clock(),
       status: "OPEN",
     });
