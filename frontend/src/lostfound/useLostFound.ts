@@ -90,15 +90,25 @@ function refreshAgain() {
   }, FOLLOW_UP_MS);
 }
 
-/** Files a report. A photo or spot that is empty is left out of the request, never sent as an empty string. */
-async function fileReport(input: FileInput): Promise<boolean> {
+/**
+ * Files a report and returns its id, or `{ error }` with the sentence to show. A refusal is returned to the form
+ * rather than put in the page's banner, so the form can show it and keep what the person typed.
+ * A photo or spot that is empty is left out of the request, never sent as an empty string.
+ */
+async function fileReport(input: FileInput): Promise<{ report: ReportId } | { error: string }> {
   const { photo, spot, ...required } = input;
   const request: FileInput = { ...required };
   if (photo !== undefined && photo !== "") request.photo = photo;
   if (spot !== undefined && spot.trim() !== "") request.spot = spot.trim();
-  const accepted = await change("/reports/file", api.reports.file(request));
-  refreshAgain();
-  return accepted;
+  working.value = true;
+  const result = await call("/reports/file", api.reports.file(request));
+  if (!("error" in result)) {
+    error.value = null;
+    await refresh();
+    refreshAgain();
+  }
+  working.value = false;
+  return result;
 }
 
 /** Claims a found report. A refusal reloads the lists, which no longer show a report that was taken. */

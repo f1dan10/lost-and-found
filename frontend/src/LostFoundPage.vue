@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue";
 import Icon from "./reusable/ui/Icon.vue";
+import AddMenu from "./lostfound/AddMenu.vue";
 import ReportList from "./lostfound/ReportList.vue";
 import { type Tab, useLostFound } from "./lostfound/useLostFound.ts";
 
@@ -49,6 +50,7 @@ const tabs = computed<{ id: Tab; label: string; count: number }[]>(() => [
       <ReportList v-else-if="tab === 'lost'" :cards="reports.lost" kind="lost" />
       <p v-else class="muted">{{ places.length }} buildings. The board comes next.</p>
     </template>
+    <AddMenu />
   </section>
 </template>
 

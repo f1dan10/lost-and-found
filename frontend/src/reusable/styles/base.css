@@ -183,7 +183,9 @@ button:disabled {
   font-weight: 600;
 }
 
-.field input {
+.field input:not([type="checkbox"]),
+.field select,
+.field textarea {
   min-height: 44px;
   padding: 0 14px;
   border: 1.5px solid var(--color-border);
@@ -192,7 +194,14 @@ button:disabled {
   font-weight: 400;
 }
 
-.field input:focus {
+.field textarea {
+  padding: 10px 14px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
   outline: none;
   border-color: var(--color-accent);
 }
