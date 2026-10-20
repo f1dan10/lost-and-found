@@ -5,9 +5,9 @@ const messages: Record<string, Record<string, string>> = {
     CONFLICT: "That report already has a location.",
   },
   "/reports/claim": {
-    CONFLICT: "Someone already claimed this item.",
+    CONFLICT: "Someone claimed this item a moment before you, so it has moved to the Claimed tab.",
     FORBIDDEN: "You can't claim your own report.",
-    NOT_FOUND: "This item is no longer available.",
+    NOT_FOUND: "Someone just claimed this item, or its finder removed it. The list is up to date now.",
   },
   "/reports/withdraw": {
     CONFLICT: "This report is already closed, so there is nothing to remove.",

@@ -25,6 +25,7 @@
     "generate": "sync-engine artifacts pin",
     "check": "sync-engine check && sync-engine artifacts check && tsc --noEmit && bun run --cwd frontend typecheck",
     "test": "bun test --timeout 60000",
+    "test:save": "bun test --timeout 60000 2>&1 | tee tests/output.txt",
     "trace": "TRACE=1 bun test tests/compositions/journey.test.ts"
   }
 }

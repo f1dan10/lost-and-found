@@ -42,6 +42,7 @@ const tabs = computed<{ id: Tab; label: string; icon: IconName; count: number | 
           class="tab"
           :class="[entry.id, { on: tab === entry.id }]"
           :aria-selected="tab === entry.id"
+          :aria-label="entry.count === null ? entry.label : `${entry.label}, ${entry.count}`"
           @click="tab = entry.id"
         >
           <Icon :name="entry.icon" :size="18" />
@@ -131,6 +132,7 @@ const tabs = computed<{ id: Tab; label: string; icon: IconName; count: number | 
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  width: max-content;
   max-width: min(520px, calc(100vw - 120px));
   padding: 12px 18px;
   border-radius: var(--radius-md);
@@ -172,8 +174,12 @@ const tabs = computed<{ id: Tab; label: string; icon: IconName; count: number | 
     display: none;
   }
   .toast {
-    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
-    max-width: calc(100vw - 32px);
+    left: 16px;
+    right: 96px;
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    max-width: none;
+    transform: none;
   }
 }
 </style>

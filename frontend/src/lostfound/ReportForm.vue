@@ -25,6 +25,8 @@ const photo = ref<string | null>(null);
 const refusal = ref<string | null>(null);
 
 const lost = computed(() => props.kind === "lost");
+/** Buildings in the order people expect: Building 2 before Building 10. */
+const sorted = computed(() => [...places.value].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })));
 const chosen = computed(() => (lost.value ? buildings.value : building.value ? [building.value] : []));
 const atMost = computed(() => buildings.value.length >= MAX_PLACES);
 
@@ -84,7 +86,7 @@ async function submit() {
 </script>
 
 <template>
-  <Dialog :title="lost ? 'Report something you lost' : 'Report something you found'" :subtitle="lost ? 'Owners of matching found items are told, and so are you.' : 'Leave the item where it is. Its owner will come to it.'" @close="emit('close')">
+  <Dialog :title="lost ? 'Report something you lost' : 'Report something you found'" :subtitle="lost ? 'You are told when someone finds a match in one of your buildings.' : 'Leave the item where it is. Its owner will come to it.'" @close="emit('close')">
     <form class="form" novalidate @submit.prevent="submit">
       <label class="field">
         Category
@@ -103,8 +105,14 @@ async function submit() {
       <fieldset v-if="lost" class="field">
         <legend>Buildings <span class="hint">Where it may have been. {{ MAX_PLACES }} at most.</span></legend>
         <div class="checks">
-          <label v-for="place in places" :key="place.place" class="check">
-            <input v-model="buildings" type="checkbox" :value="place.place" :disabled="atMost && !buildings.includes(place.place)" />
+          <label v-for="place in sorted" :key="place.place" class="check">
+            <input
+              v-model="buildings"
+              type="checkbox"
+              :value="place.place"
+              :aria-label="place.name"
+              :disabled="atMost && !buildings.includes(place.place)"
+            />
             {{ place.name }}
           </label>
         </div>
@@ -113,7 +121,7 @@ async function submit() {
         Building
         <select v-model="building" required>
           <option value="" disabled>Where you left it</option>
-          <option v-for="place in places" :key="place.place" :value="place.place">{{ place.name }}</option>
+          <option v-for="place in sorted" :key="place.place" :value="place.place">{{ place.name }}</option>
         </select>
       </label>
 
@@ -170,14 +178,26 @@ async function submit() {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 6px 12px;
-  max-height: 180px;
+  max-height: 220px;
   overflow-y: auto;
 }
+/* A whole row is the target, not just the box (Fitts's law). */
 .check {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
   font-weight: 400;
+  cursor: pointer;
+}
+.check:hover {
+  background: var(--color-line);
+}
+.check input {
+  width: 18px;
+  height: 18px;
 }
 .preview {
   display: flex;

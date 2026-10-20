@@ -25,6 +25,7 @@ Personal project for 6.1040 Software Design, Fall 2026.
 ## P3: Beta
 
 1. [Visual design study](design/visual-study/README.md): two slides, on typography and colour, with notes on what I used.
+2. [Testing](design/testing.md): what the automated tests cover, and what I checked by walking through the app. The last test run is saved in [tests/output.txt](tests/output.txt).
 
 ### Run it
 
@@ -37,4 +38,17 @@ MONGODB_URI=mongodb://localhost:27017/lostfound bun run build && MONGODB_URI=mon
 
 Open http://localhost:3000. To try the journey, sign up as one person in a normal window and as another in a private window. Without `MONGODB_URI`, the server keeps its data in memory and loses it when it stops. Email notices are printed to the server's console.
 
-`bun run test` runs the tests, and `bun run check` checks the specifications against the code and runs TypeScript.
+`bun run check` checks the specifications against the code and runs TypeScript.
+
+### Run the tests
+
+```
+bun install
+bun run test
+```
+
+No database setup is needed. Each test file gets its own fresh database on an in-memory MongoDB (`mongodb-memory-server`), which starts a real `mongod`. The first run downloads that binary, so it needs a network connection. The whole suite takes about two minutes.
+
+- `bun run test:save` runs the tests and saves the output to `tests/output.txt`.
+- `bun test tests/concepts/Claiming.test.ts` runs one file.
+- `bun run trace` runs the journey test and prints each action with the endpoint or reaction that caused it.
