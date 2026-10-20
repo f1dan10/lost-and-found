@@ -11,5 +11,7 @@ export const claiming = registerConcept({
   class: Claiming,
   spec,
   refusals: { ALREADY_CLAIMED: AlreadyClaimed },
-  floors: { mongo: ({ database }: { database: Db }, name: string) => new Claiming(database, name) },
+  floors: {
+    mongo: ({ database, clock }: { database: Db; clock?: () => Date }, name: string) => new Claiming(database, name, clock),
+  },
 });

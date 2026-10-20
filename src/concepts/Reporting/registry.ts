@@ -14,5 +14,7 @@ export const reporting = registerConcept({
     REPORT_NOT_FOUND: ReportNotFound,
     NOT_OPEN: NotOpen,
   },
-  floors: { mongo: ({ database }: { database: Db }, name: string) => new Reporting(database, name) },
+  floors: {
+    mongo: ({ database, clock }: { database: Db; clock?: () => Date }, name: string) => new Reporting(database, name, clock),
+  },
 });

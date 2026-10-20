@@ -35,6 +35,7 @@ describe("Reporting", () => {
         category: "BOTTLE",
         description: "Blue Hydro Flask",
         filedAt: new Date(Date.UTC(2026, 9, 13, 12, 0)),
+        expiresAt: new Date(Date.UTC(2026, 9, 27, 12, 0)),
         status: "OPEN",
       },
     ]);
@@ -101,6 +102,73 @@ describe("Reporting", () => {
 
     expect(await reporting._getOpen({ kind: "FOUND" })).toEqual([{ report: third }, { report: second }, { report: first }]);
     expect(await reporting._getOpen({ kind: "FOUND", category: "BOTTLE" })).toEqual([{ report: third }, { report: first }]);
+  });
+
+  test("its principle, continued: Sam's lost keys expire after two weeks, and renewing keeps them open for two more", async () => {
+    let now = new Date(Date.UTC(2026, 9, 13, 12, 0));
+    const reporting = new ReportingConcept<string>(await testDatabase(), "Reporting", () => now);
+    const later = (days: number) => new Date(Date.UTC(2026, 9, 13 + days, 12, 0));
+    const { report } = await reporting.file({ ...bottle, reporter: SAM, kind: "LOST", category: "KEYS_ID" });
+
+    now = later(13);
+    expect(await reporting._getOpen({ kind: "LOST" })).toEqual([{ report }]);
+    now = later(14);
+    expect(await reporting._getOpen({ kind: "LOST" })).toEqual([]);
+    expect(await reporting._getReport({ report })).toMatchObject([{ status: "OPEN", expiresAt: later(14) }]);
+
+    expect(await reporting.renew({ report })).toEqual({ report });
+    expect(await reporting._getOpen({ kind: "LOST" })).toEqual([{ report }]);
+    expect(await reporting._getReport({ report })).toMatchObject([{ status: "OPEN", expiresAt: later(28) }]);
+    now = later(28);
+    expect(await reporting._getOpen({ kind: "LOST" })).toEqual([]);
+  });
+
+  test("renewing a report that is still open moves its expiry forward from now", async () => {
+    let now = new Date(Date.UTC(2026, 9, 13, 12, 0));
+    const reporting = new ReportingConcept<string>(await testDatabase(), "Reporting", () => now, 7);
+    const { report } = await reporting.file(bottle);
+    expect(await reporting._getReport({ report })).toMatchObject([{ expiresAt: new Date(Date.UTC(2026, 9, 20, 12, 0)) }]);
+    now = new Date(Date.UTC(2026, 9, 15, 12, 0));
+    await reporting.renew({ report });
+    expect(await reporting._getReport({ report })).toMatchObject([{ expiresAt: new Date(Date.UTC(2026, 9, 22, 12, 0)) }]);
+  });
+
+  test("renewing an unknown report is refused with REPORT_NOT_FOUND, and a closed one with NOT_OPEN, changing nothing", async () => {
+    const { reporting } = await setup();
+    await expect(reporting.renew({ report: "nothing" as Report })).rejects.toThrow(ReportNotFound);
+    const { report } = await reporting.file(bottle);
+    await reporting.withdraw({ report });
+    const before = await reporting._getReport({ report });
+    await expect(reporting.renew({ report })).rejects.toThrow(NotOpen);
+    expect(await reporting._getReport({ report })).toEqual(before);
+  });
+
+  test("an expired report can still be resolved or withdrawn by its reporter", async () => {
+    let now = new Date(Date.UTC(2026, 9, 13, 12, 0));
+    const reporting = new ReportingConcept<string>(await testDatabase(), "Reporting", () => now);
+    const { report: resolved } = await reporting.file(bottle);
+    const { report: withdrawn } = await reporting.file(bottle);
+    now = new Date(Date.UTC(2026, 10, 13, 12, 0));
+    await reporting.resolve({ report: resolved });
+    await reporting.withdraw({ report: withdrawn });
+    expect(await reporting._getReport({ report: resolved })).toMatchObject([{ status: "RESOLVED" }]);
+    expect(await reporting._getReport({ report: withdrawn })).toMatchObject([{ status: "WITHDRAWN" }]);
+  });
+
+  test("a report stored before reports had an expiry expires 14 days after it was filed", async () => {
+    // Reports filed by the Alpha have no expiresAt, so this one is written directly, as the Alpha stored it.
+    let now = new Date(Date.UTC(2026, 9, 20, 12, 0));
+    const database = await testDatabase();
+    const reporting = new ReportingConcept<string>(database, "Reporting", () => now);
+    const filedAt = new Date(Date.UTC(2026, 9, 13, 12, 0));
+    await database.collection("reporting.reports").insertOne({ _id: "alpha" as never, ...bottle, filedAt, status: "OPEN" });
+
+    expect(await reporting._getOpen({ kind: "FOUND" })).toEqual([{ report: "alpha" as Report }]);
+    expect(await reporting._getReport({ report: "alpha" as Report })).toMatchObject([{ expiresAt: new Date(Date.UTC(2026, 9, 27, 12, 0)) }]);
+    now = new Date(Date.UTC(2026, 9, 27, 12, 0));
+    expect(await reporting._getOpen({ kind: "FOUND" })).toEqual([]);
+    await reporting.renew({ report: "alpha" as Report });
+    expect(await reporting._getOpen({ kind: "FOUND" })).toEqual([{ report: "alpha" as Report }]);
   });
 
   test("a reporter's own reports come newest first, whatever their status, and never another reporter's", async () => {

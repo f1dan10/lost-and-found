@@ -132,6 +132,9 @@ Defined in [Reporting](../design/concepts/Reporting.md), line 1.
 - `resolve(report: Report) : returns (report: Report)`
   - Refuses `REPORT_NOT_FOUND`: There is no such report.
   - Refuses `NOT_OPEN`: This report is no longer open.
+- `renew(report: Report) : returns (report: Report)`
+  - Refuses `REPORT_NOT_FOUND`: There is no such report.
+  - Refuses `NOT_OPEN`: This report is no longer open.
 - `withdraw(report: Report) : returns (report: Report)`
   - Refuses `REPORT_NOT_FOUND`: There is no such report.
   - Refuses `NOT_OPEN`: This report is no longer open.
@@ -140,7 +143,7 @@ Defined in [Reporting](../design/concepts/Reporting.md), line 1.
 
 - `_getOpen(kind: Kind, category?: Category) : many (report: Report)`
 - `_getByReporter(reporter: Reporter) : many (report: Report)`
-- `_getReport(report: Report) : optional (reporter: Reporter, kind: Kind, category: Category, description: String, filedAt: DateTime, status: Status)`
+- `_getReport(report: Report) : optional (reporter: Reporter, kind: Kind, category: Category, description: String, filedAt: DateTime, expiresAt: DateTime, status: Status)`
 - `_getPhoto(report: Report) : optional (photo: String)`
 
 #### Instances
@@ -186,7 +189,7 @@ Authored path: `access.permissions.isOpenFound`.
 
 ```view
 (report) is an open found report — inputs (report); outputs (); bindings ()
-  where Reporting._getReport (report) has (kind: "FOUND", status: "OPEN")
+  where Reporting._getOpen (kind: "FOUND") has (report)
 ```
 
 ### (user) has the unread (notification)
@@ -262,15 +265,16 @@ Authored path: `reports.listing.reportCards`.
 - Covered by [Reports](../design/compositions/reports.md), line 13.
 
 ```former
-Former "the open reports of (kind)" — inputs (kind); bindings (report, category, description, filedAt, reporter, username, place, name, spot, photo); promises exactly one record — forms:
+Former "the open reports of (kind)" — inputs (kind); bindings (report, category, description, filedAt, expiresAt, reporter, username, place, name, spot, photo); promises exactly one record — forms:
   each Reporting._getOpen (kind) has (report)
-    where Reporting._getReport (report) has (category, description, filedAt, reporter)
+    where Reporting._getReport (report) has (category, description, expiresAt, filedAt, reporter)
     where Registering._username (user: reporter) has (username)
     where whether Locating._getSpot (item: report) has (spot)
     where whether Reporting._getPhoto (report) has (photo)
     form a record of
       category
       description
+      expiresAt
       filedAt
       photo
       places: each Locating._getPlacesOf (item: report) has (name, place)
@@ -310,12 +314,12 @@ Former "the recently claimed items" — inputs (); bindings (report, claimedAt, 
 ### the reports of (user)
 
 Authored path: `owning.listing.myReports`.
-- Covered by [Owning](../design/compositions/owning.md), line 18.
+- Covered by [Owning](../design/compositions/owning.md), line 21.
 
 ```former
-Former "the reports of (user)" — inputs (user); bindings (report, kind, category, description, filedAt, status, place, name, spot, photo, claimant, claimedBy); promises exactly one record — forms:
+Former "the reports of (user)" — inputs (user); bindings (report, kind, category, description, filedAt, expiresAt, status, place, name, spot, photo, claimant, claimedBy); promises exactly one record — forms:
   each Reporting._getByReporter (reporter: user) has (report)
-    where Reporting._getReport (report) has (category, description, filedAt, kind, status)
+    where Reporting._getReport (report) has (category, description, expiresAt, filedAt, kind, status)
     where whether Locating._getSpot (item: report) has (spot)
     where whether Reporting._getPhoto (report) has (photo)
     where whether Claiming._getClaimant (item: report) has (claimant)
@@ -324,6 +328,7 @@ Former "the reports of (user)" — inputs (user); bindings (report, kind, catego
       category
       claimedBy
       description
+      expiresAt
       filedAt
       kind
       photo
@@ -550,7 +555,8 @@ where
   Reporting._getReport (report: found) has (category, kind: "FOUND")
   Locating._getPlacesOf (item: found) has (place)
   Locating._getItemsAt (place) has (item: lost)
-  Reporting._getReport (report: lost) has (category, kind: "LOST", reporter, status: "OPEN")
+  Reporting._getOpen (category, kind: "LOST") has (report: lost)
+  Reporting._getReport (report: lost) has (reporter)
 then
   Notifying.notify (message: "An item matching your lost report was found.", recipient: reporter, subject: found)
 ```
@@ -637,11 +643,67 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### owning.closing.RenewReport
+
+Authored path: `owning.closing.RenewReport`.
+- Covered by [Owning](../design/compositions/owning.md), line 11.
+- Covered by [Owning](../design/compositions/owning.md), line 16.
+
+```reaction
+when RequestBoundary.request (path: "/reports/renew", report, requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### owning.closing.RenewReport:mine#2
+
+Authored path: `owning.closing.RenewReport`.
+- Covered by [Owning](../design/compositions/owning.md), line 11.
+- Covered by [Owning](../design/compositions/owning.md), line 16.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by owning.closing.RenewReport
+where
+  earlier, RequestBoundary.request (path: "/reports/renew", report, requestId, session)
+  view "(user) owns (report)" with (report, user)
+then
+  Reporting.renew (report)
+```
+
+### owning.closing.RenewReport:mine#3
+
+Authored path: `owning.closing.RenewReport`.
+- Covered by [Owning](../design/compositions/owning.md), line 11.
+- Covered by [Owning](../design/compositions/owning.md), line 16.
+
+```reaction
+when Reporting.renew (report), asked by owning.closing.RenewReport:mine#2
+where
+  earlier, RequestBoundary.request (path: "/reports/renew", report, requestId, session)
+then
+  RequestBoundary.respond (report, requestId)
+```
+
+### owning.closing.RenewReport:refused#2
+
+Authored path: `owning.closing.RenewReport`.
+- Covered by [Owning](../design/compositions/owning.md), line 11.
+- Covered by [Owning](../design/compositions/owning.md), line 16.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by owning.closing.RenewReport
+where
+  earlier, RequestBoundary.request (path: "/reports/renew", report, requestId, session)
+  no view "(user) owns (report)" with (report, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
 ### owning.closing.ResolveReport
 
 Authored path: `owning.closing.ResolveReport`.
 - Covered by [Owning](../design/compositions/owning.md), line 7.
-- Covered by [Owning](../design/compositions/owning.md), line 13.
+- Covered by [Owning](../design/compositions/owning.md), line 15.
 
 ```reaction
 when RequestBoundary.request (path: "/reports/resolve", report, requestId, session)
@@ -653,7 +715,7 @@ then
 
 Authored path: `owning.closing.ResolveReport`.
 - Covered by [Owning](../design/compositions/owning.md), line 7.
-- Covered by [Owning](../design/compositions/owning.md), line 13.
+- Covered by [Owning](../design/compositions/owning.md), line 15.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by owning.closing.ResolveReport
@@ -668,7 +730,7 @@ then
 
 Authored path: `owning.closing.ResolveReport`.
 - Covered by [Owning](../design/compositions/owning.md), line 7.
-- Covered by [Owning](../design/compositions/owning.md), line 13.
+- Covered by [Owning](../design/compositions/owning.md), line 15.
 
 ```reaction
 when Reporting.resolve (report), asked by owning.closing.ResolveReport:mine#2
@@ -682,7 +744,7 @@ then
 
 Authored path: `owning.closing.ResolveReport`.
 - Covered by [Owning](../design/compositions/owning.md), line 7.
-- Covered by [Owning](../design/compositions/owning.md), line 13.
+- Covered by [Owning](../design/compositions/owning.md), line 15.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by owning.closing.ResolveReport
@@ -697,7 +759,7 @@ then
 
 Authored path: `owning.closing.WithdrawReport`.
 - Covered by [Owning](../design/compositions/owning.md), line 7.
-- Covered by [Owning](../design/compositions/owning.md), line 12.
+- Covered by [Owning](../design/compositions/owning.md), line 14.
 
 ```reaction
 when RequestBoundary.request (path: "/reports/withdraw", report, requestId, session)
@@ -709,7 +771,7 @@ then
 
 Authored path: `owning.closing.WithdrawReport`.
 - Covered by [Owning](../design/compositions/owning.md), line 7.
-- Covered by [Owning](../design/compositions/owning.md), line 12.
+- Covered by [Owning](../design/compositions/owning.md), line 14.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by owning.closing.WithdrawReport
@@ -724,7 +786,7 @@ then
 
 Authored path: `owning.closing.WithdrawReport`.
 - Covered by [Owning](../design/compositions/owning.md), line 7.
-- Covered by [Owning](../design/compositions/owning.md), line 12.
+- Covered by [Owning](../design/compositions/owning.md), line 14.
 
 ```reaction
 when Reporting.withdraw (report), asked by owning.closing.WithdrawReport:mine#2
@@ -738,7 +800,7 @@ then
 
 Authored path: `owning.closing.WithdrawReport`.
 - Covered by [Owning](../design/compositions/owning.md), line 7.
-- Covered by [Owning](../design/compositions/owning.md), line 12.
+- Covered by [Owning](../design/compositions/owning.md), line 14.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by owning.closing.WithdrawReport
@@ -752,8 +814,8 @@ then
 ### owning.listing.ListMyReports
 
 Authored path: `owning.listing.ListMyReports`.
-- Covered by [Owning](../design/compositions/owning.md), line 18.
 - Covered by [Owning](../design/compositions/owning.md), line 21.
+- Covered by [Owning](../design/compositions/owning.md), line 24.
 
 ```reaction
 when RequestBoundary.request (path: "/reports/mine", requestId, session)
@@ -764,8 +826,8 @@ then
 ### owning.listing.ListMyReports#2
 
 Authored path: `owning.listing.ListMyReports`.
-- Covered by [Owning](../design/compositions/owning.md), line 18.
 - Covered by [Owning](../design/compositions/owning.md), line 21.
+- Covered by [Owning](../design/compositions/owning.md), line 24.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by owning.listing.ListMyReports
@@ -1092,5 +1154,6 @@ not listed here have no explicit input contract.
 - `/reports/file` — requires `session`, `kind`, `category`, `description`, `places`; fills `photo` with null when absent; fills `spot` with null when absent
 - `/reports/list` — requires `session`
 - `/reports/mine` — requires `session`
+- `/reports/renew` — requires `report`, `session`
 - `/reports/resolve` — requires `report`, `session`
 - `/reports/withdraw` — requires `report`, `session`

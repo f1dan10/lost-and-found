@@ -12,9 +12,12 @@ import { composition as accounts } from "./compositions/reusable/accounts.ts";
 import { composition as passwords } from "./compositions/reusable/passwords.ts";
 import { applicationConceptSet } from "./concepts.ts";
 
-/** Builds Lost&Found on a database and a mailer; the HTTP server, the tests, and `sync-engine check` all use it. */
+/**
+ * Builds Lost&Found on a database and a mailer; the HTTP server, the tests, and `sync-engine check` all use it.
+ * Tests may pass a `clock` so reports can expire and claims can age without waiting; Reporting and Claiming read it.
+ */
 export function assembleLostFound(
-  resources: { database: Db; mailer: Mailer },
+  resources: { database: Db; mailer: Mailer; clock?: () => Date },
   options: { observers?: OperationalObserver[]; logSink?: LogSink } = {},
 ) {
   return assemble({

@@ -8,12 +8,15 @@ import { testDatabase } from "./reusable/mongo.ts";
 import { ok } from "./reusable/results.ts";
 import { printTrace } from "./trace.ts";
 
-/** Lost&Found on a fresh database, with an in-memory mailer, called through its typed client. With TRACE set, it prints each action. */
-export async function startLostFound(observers: OperationalObserver[] = []) {
+/**
+ * Lost&Found on a fresh database, with an in-memory mailer, called through its typed client. With TRACE set, it prints each action.
+ * A `clock` is passed to Reporting and Claiming only, so a test can move time forward without ending the sessions.
+ */
+export async function startLostFound(observers: OperationalObserver[] = [], options: { clock?: () => Date } = {}) {
   const database = await testDatabase();
   const mailer = new MemoryMailer();
   const logSink = process.env.TRACE ? printTrace() : undefined;
-  const application = assembleLostFound({ database, mailer }, { observers, logSink });
+  const application = assembleLostFound({ database, mailer, ...options }, { observers, logSink });
   const api = createLocalClient<LostFoundWire>({ invoker: createGateway<LostFoundWire>({ application }) });
 
   async function register(username: string) {

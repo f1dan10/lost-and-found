@@ -8,9 +8,9 @@ export const owns = view("(user) owns (report)", ({ user, report }) =>
   where(Reporting._getReport({ report }).is({ reporter: user })),
 ).holds();
 
-/** A found report is still open until its finder resolves or withdraws it, or someone claims it. */
+/** A found report is open until its finder resolves or withdraws it, someone claims it, or it expires unrenewed. */
 export const isOpenFound = view("(report) is an open found report", ({ report }) =>
-  where(Reporting._getReport({ report }).is({ kind: "FOUND", status: "OPEN" })),
+  where(Reporting._getOpen({ kind: "FOUND" }).is({ report })),
 ).holds();
 
 export const composition = {

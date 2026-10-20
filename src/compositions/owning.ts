@@ -47,19 +47,37 @@ const ResolveReport = endpoint(
   { validators: { input: textInput } },
 );
 
+/** The owner says the item is still there, or still lost, which keeps the report open for two more weeks. */
+const RenewReport = endpoint(
+  "/reports/renew",
+  ({ session, report, user }) =>
+    receive({ session, report })
+      .then(Sessioning.use({ session }).responds({ subject: user }))
+      .then(
+        where(owns({ user, report }))
+          .then(Reporting.renew({ report }).responds({ report }))
+          .then(respond({ report }))
+          .named("mine"),
+        where(no(owns({ user, report })))
+          .then(respond({ error: "NOT_FOUND" }))
+          .named("refused"),
+      ),
+  { validators: { input: textInput } },
+);
+
 // Listing
 
 /**
- * Every report the user filed, newest first, open or closed, with its kind and status so the screen can offer
- * the right actions. The spot and the photo are null when a report has none. `claimedBy` is the username of whoever
+ * Every report the user filed, newest first, open or closed, with its kind, status, and expiry so the screen can
+ * offer the right actions, such as renewing one that has expired. The spot and the photo are null when a report has none. `claimedBy` is the username of whoever
  * claimed a found report, shown only here to the person who found it, and null while it is unclaimed.
  */
 export const myReports = former(
   "the reports of (user)",
-  ({ user }, { report, kind, category, description, filedAt, status, place, name, spot, photo, claimant, claimedBy }) =>
+  ({ user }, { report, kind, category, description, filedAt, expiresAt, status, place, name, spot, photo, claimant, claimedBy }) =>
     each(Reporting._getByReporter({ reporter: user }).is({ report }))
       .where(
-        Reporting._getReport({ report }).is({ kind, category, description, filedAt, status }),
+        Reporting._getReport({ report }).is({ kind, category, description, filedAt, expiresAt, status }),
         whether(Locating._getSpot({ item: report }).is({ spot })),
         whether(Reporting._getPhoto({ report }).is({ photo })),
         whether(Claiming._getClaimant({ item: report }).is({ claimant })),
@@ -71,6 +89,7 @@ export const myReports = former(
         category,
         description,
         filedAt,
+        expiresAt,
         status,
         claimedBy,
         spot,
@@ -89,6 +108,6 @@ const ListMyReports = endpoint(
 );
 
 export const composition = {
-  closing: { WithdrawReport, ResolveReport },
+  closing: { WithdrawReport, ResolveReport, RenewReport },
   listing: { myReports, ListMyReports },
 };

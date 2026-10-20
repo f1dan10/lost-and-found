@@ -136,7 +136,7 @@ export type LostFoundWire = {
   };
   "/reports/claim": {
     input: {
-      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>>, ["item"]>]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>]>>;
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getOpen"]>>>, ["report"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>>, ["item"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getOpen"]>>>, ["report"]>]>]>>;
       "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
     };
     output: {
@@ -167,6 +167,7 @@ export type LostFoundWire = {
       "found": ({
         "category": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["category"]>>;
         "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["description"]>>;
+        "expiresAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["expiresAt"]>>;
         "filedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["filedAt"]>>;
         "photo": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>>>, ["photo"]>> | null;
         "places": {
@@ -181,6 +182,7 @@ export type LostFoundWire = {
       "lost": ({
         "category": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["category"]>>;
         "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["description"]>>;
+        "expiresAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["expiresAt"]>>;
         "filedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["filedAt"]>>;
         "photo": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>>>, ["photo"]>> | null;
         "places": {
@@ -204,6 +206,7 @@ export type LostFoundWire = {
         "category": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["category"]>>;
         "claimedBy": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>>>, ["username"]>> | null;
         "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["description"]>>;
+        "expiresAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["expiresAt"]>>;
         "filedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["filedAt"]>>;
         "kind": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["kind"]>>;
         "photo": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>>>, ["photo"]>> | null;
@@ -217,6 +220,16 @@ export type LostFoundWire = {
       })[];
     };
     error: { error: AppWideError | "INVALID_INPUT" | "NOT_SIGNED_IN" };
+  };
+  "/reports/renew": {
+    input: {
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["renew"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["renew"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["renew"]>>, ["report"]>]>]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["renew"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["renew"]>>, ["report"]>]>>;
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "NOT_FOUND" | "NOT_OPEN" | "NOT_SIGNED_IN" | "REPORT_NOT_FOUND" };
   };
   "/reports/resolve": {
     input: {
@@ -348,7 +361,7 @@ export type LostFoundWireHttp = {
   };
   "/reports/claim": {
     input: {
-      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>>, ["item"]>]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>]>>;
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getOpen"]>>>, ["report"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>>, ["item"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getOpen"]>>>, ["report"]>]>]>>;
     };
     output: {
       "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["claim"]>>, ["item"]>]>>;
@@ -375,6 +388,7 @@ export type LostFoundWireHttp = {
       "found": ({
         "category": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["category"]>>;
         "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["description"]>>;
+        "expiresAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["expiresAt"]>>;
         "filedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["filedAt"]>>;
         "photo": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>>>, ["photo"]>> | null;
         "places": {
@@ -389,6 +403,7 @@ export type LostFoundWireHttp = {
       "lost": ({
         "category": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["category"]>>;
         "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["description"]>>;
+        "expiresAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["expiresAt"]>>;
         "filedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["filedAt"]>>;
         "photo": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>>>, ["photo"]>> | null;
         "places": {
@@ -410,6 +425,7 @@ export type LostFoundWireHttp = {
         "category": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["category"]>>;
         "claimedBy": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>>>, ["username"]>> | null;
         "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["description"]>>;
+        "expiresAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["expiresAt"]>>;
         "filedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["filedAt"]>>;
         "kind": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["kind"]>>;
         "photo": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>>>, ["photo"]>> | null;
@@ -423,6 +439,15 @@ export type LostFoundWireHttp = {
       })[];
     };
     error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
+  };
+  "/reports/renew": {
+    input: {
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["renew"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["renew"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["renew"]>>, ["report"]>]>]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["renew"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["renew"]>>, ["report"]>]>>;
+    };
+    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
   };
   "/reports/resolve": {
     input: {

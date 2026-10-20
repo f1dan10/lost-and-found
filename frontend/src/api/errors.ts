@@ -17,6 +17,10 @@ const messages: Record<string, Record<string, string>> = {
     CONFLICT: "This report is already closed.",
     NOT_FOUND: "You can only close your own reports.",
   },
+  "/reports/renew": {
+    CONFLICT: "This report is closed, so it can't be renewed.",
+    NOT_FOUND: "You can only renew your own reports.",
+  },
   "/notifications/read": { NOT_FOUND: "That notice is already gone." },
 };
 

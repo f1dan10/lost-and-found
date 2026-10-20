@@ -8,6 +8,7 @@ const KINDS = ["FOUND", "LOST"] as const;
 const CATEGORIES = ["BOTTLE", "CLOTHING", "ELECTRONICS", "KEYS_ID", "BAG", "JEWELRY", "OTHER"] as const;
 const MAX_DESCRIPTION = 500;
 const MAX_PHOTO = 2_000_000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export type Kind = (typeof KINDS)[number];
 export type Category = (typeof CATEGORIES)[number];
@@ -22,6 +23,8 @@ interface ReportDocument<Reporter> {
   description: string;
   photo?: string;
   filedAt: Date;
+  /** Missing on reports filed before reports expired; those expire `lifetimeDays` after `filedAt`. */
+  expiresAt?: Date;
   status: Status;
 }
 
@@ -33,6 +36,7 @@ export class ReportingConcept<Reporter extends string> {
     database: Db,
     name = "Reporting",
     private readonly clock: () => Date = () => new Date(),
+    private readonly lifetimeDays = 14,
   ) {
     this.reports = database.collection(`${name.toLowerCase()}.reports`);
   }
@@ -63,6 +67,7 @@ export class ReportingConcept<Reporter extends string> {
       );
     }
     const report = crypto.randomUUID() as Report;
+    const filedAt = this.clock();
     await this.reports.insertOne({
       _id: report,
       reporter,
@@ -70,7 +75,8 @@ export class ReportingConcept<Reporter extends string> {
       category,
       description,
       ...(photo === undefined || photo === null ? {} : { photo }),
-      filedAt: this.clock(),
+      filedAt,
+      expiresAt: this.#lifetimeFrom(filedAt),
       status: "OPEN",
     });
     return { report };
@@ -81,6 +87,16 @@ export class ReportingConcept<Reporter extends string> {
     return { report };
   }
 
+  /** Keeps an open report open for another lifetime, even one that has already expired. */
+  async renew({ report }: { report: Report }) {
+    const { matchedCount } = await this.reports.updateOne(
+      { _id: report, status: "OPEN" },
+      { $set: { expiresAt: this.#lifetimeFrom(this.clock()) } },
+    );
+    if (matchedCount === 0) await this.#refuseClosed(report);
+    return { report };
+  }
+
   async withdraw({ report }: { report: Report }) {
     await this.#close(report, "WITHDRAWN");
     return { report };
@@ -88,7 +104,7 @@ export class ReportingConcept<Reporter extends string> {
 
   async _getOpen({ kind, category }: { kind: Kind; category?: Category }) {
     const found = await this.reports
-      .find({ status: "OPEN", kind, ...(category === undefined ? {} : { category }) })
+      .find({ status: "OPEN", kind, ...(category === undefined ? {} : { category }), ...this.#unexpired() })
       .sort({ filedAt: -1, _id: -1 })
       .toArray();
     return found.map(({ _id }) => ({ report: _id }));
@@ -103,7 +119,8 @@ export class ReportingConcept<Reporter extends string> {
     const found = await this.reports.findOne({ _id: report });
     if (found === null) return [];
     const { reporter, kind, category, description, filedAt, status } = found;
-    return [{ reporter, kind, category, description, filedAt, status }];
+    const expiresAt = found.expiresAt ?? this.#lifetimeFrom(filedAt);
+    return [{ reporter, kind, category, description, filedAt, expiresAt, status }];
   }
 
   async _getPhoto({ report }: { report: Report }) {
@@ -114,10 +131,29 @@ export class ReportingConcept<Reporter extends string> {
   /** Moves an open report to a closed status, or reads it once to say why it could not. */
   async #close(report: Report, status: "RESOLVED" | "WITHDRAWN") {
     const { matchedCount } = await this.reports.updateOne({ _id: report, status: "OPEN" }, { $set: { status } });
-    if (matchedCount > 0) return;
+    if (matchedCount === 0) await this.#refuseClosed(report);
+  }
+
+  /** Called when no open report matched: says whether the report is unknown or closed. */
+  async #refuseClosed(report: Report): Promise<never> {
     if ((await this.reports.countDocuments({ _id: report })) === 0) {
       throw new ReportNotFound("There is no such report.");
     }
     throw new NotOpen("This report is no longer open.");
+  }
+
+  #lifetimeFrom(start: Date) {
+    return new Date(start.getTime() + this.lifetimeDays * DAY_MS);
+  }
+
+  /** The filter for reports that have not expired yet, including ones filed before reports had an expiresAt. */
+  #unexpired() {
+    const now = this.clock();
+    return {
+      $or: [
+        { expiresAt: { $gt: now } },
+        { expiresAt: { $exists: false }, filedAt: { $gt: new Date(now.getTime() - this.lifetimeDays * DAY_MS) } },
+      ],
+    };
   }
 }

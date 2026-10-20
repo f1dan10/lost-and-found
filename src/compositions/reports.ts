@@ -58,10 +58,10 @@ const FileReport = endpoint(
  */
 export const reportCards = former(
   "the open reports of (kind)",
-  ({ kind }, { report, category, description, filedAt, reporter, username, place, name, spot, photo }) =>
+  ({ kind }, { report, category, description, filedAt, expiresAt, reporter, username, place, name, spot, photo }) =>
     each(Reporting._getOpen({ kind }).is({ report }))
       .where(
-        Reporting._getReport({ report }).is({ category, description, filedAt, reporter }),
+        Reporting._getReport({ report }).is({ category, description, filedAt, expiresAt, reporter }),
         Registering._username({ user: reporter }).is({ username }),
         whether(Locating._getSpot({ item: report }).is({ spot })),
         whether(Reporting._getPhoto({ report }).is({ photo })),
@@ -71,6 +71,7 @@ export const reportCards = former(
         category,
         description,
         filedAt,
+        expiresAt,
         reporter,
         username,
         spot,
