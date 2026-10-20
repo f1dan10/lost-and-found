@@ -108,6 +108,14 @@ export class LocatingConcept<Item extends string> {
     return found.map(({ _id }) => ({ item: _id }));
   }
 
+  /** The items sharing a place with this one, each once, so a match is found once however many places overlap. */
+  async _getNeighbors({ item }: { item: Item }) {
+    const located = await this.items.findOne({ _id: item });
+    if (located === null) return [];
+    const found = await this.items.find({ places: { $in: located.places } }).sort({ _id: 1 }).toArray();
+    return found.filter(({ _id }) => _id !== item).map(({ _id }) => ({ other: _id }));
+  }
+
   async _getPlacesOf({ item }: { item: Item }) {
     const located = await this.items.findOne({ _id: item });
     if (located === null) return [];

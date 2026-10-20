@@ -71,4 +71,47 @@ describe("Matching", () => {
     expect(await unread(tom.user)).toMatchObject([{ subject: found }]);
     expect(mailer.sent.map(({ to }) => to).sort()).toEqual(["tamar", "tom"]);
   });
+
+  test("a found item that shares two of Tamar's places gives her one notice, not two", async () => {
+    const { mailer, tamar, tom, places, file, unread } = await setup();
+    await file(tamar.user, "LOST", "BOTTLE", lostAtFour(places));
+    const found = await file(tom.user, "FOUND", "BOTTLE", [places.b2, places.stata]);
+    expect(await unread(tamar.user)).toMatchObject([{ subject: found }]);
+    expect(mailer.sent).toHaveLength(1);
+  });
+});
+
+describe("Matching a lost report filed after the find", () => {
+  test("Tom finds the bottle first; when Tamar posts her lost bottle she gets one notice about it", async () => {
+    const { mailer, tamar, tom, places, file, unread } = await setup();
+    const found = await file(tom.user, "FOUND", "BOTTLE", [places.b2]);
+    await file(tamar.user, "LOST", "BOTTLE", lostAtFour(places));
+
+    expect(await unread(tamar.user)).toMatchObject([{ subject: found, message: "An item that may be yours was already found." }]);
+    expect(await unread(tom.user)).toEqual([]);
+    expect(mailer.sent).toEqual([{ to: "tamar", message: "An item that may be yours was already found." }]);
+  });
+
+  test("each earlier find gives one notice; another category, another place, or a closed find gives none", async () => {
+    const { Reporting, application, tamar, tom, places, file, unread } = await setup();
+    const first = await file(tom.user, "FOUND", "BOTTLE", [places.b2]);
+    const second = await file(tom.user, "FOUND", "BOTTLE", [places.stata]);
+    await file(tom.user, "FOUND", "KEYS_ID", [places.b2]);
+    await file(tom.user, "FOUND", "BOTTLE", [places.b7]);
+    const claimed = await file(tom.user, "FOUND", "BOTTLE", [places.w20]);
+    ok(await Reporting.resolve({ report: claimed }));
+    await application.whenIdle();
+
+    await file(tamar.user, "LOST", "BOTTLE", lostAtFour(places));
+    expect((await unread(tamar.user)).map(({ subject }) => subject).sort()).toEqual([first, second].sort());
+  });
+
+  test("a found report and a lost report never notify twice about each other, whichever comes first", async () => {
+    const { tamar, tom, places, file, unread } = await setup();
+    await file(tom.user, "FOUND", "BOTTLE", [places.b2]);
+    await file(tamar.user, "LOST", "BOTTLE", [places.b2]);
+    await file(tamar.user, "FOUND", "KEYS_ID", [places.b34]);
+    expect(await unread(tamar.user)).toHaveLength(1);
+    expect(await unread(tom.user)).toEqual([]);
+  });
 });

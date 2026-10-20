@@ -69,6 +69,7 @@ Defined in [Locating](../design/concepts/Locating.md), line 1.
 #### Queries
 
 - `_getItemsAt(place: Place) : many (item: Item)`
+- `_getNeighbors(item: Item) : many (other: Item)`
 - `_getPlacesOf(item: Item) : many (place: Place, name: String)`
 - `_getSpot(item: Item) : optional (spot: String)`
 - `_getPlaces() : many (place: Place, name: String, latitude: Number, longitude: Number)`
@@ -544,6 +545,21 @@ then
   RequestBoundary.respond (claims: former "the claims of (user)" with (user), requestId)
 ```
 
+### matching.notifying.NotifyOwnerOfEarlierFind
+
+Authored path: `matching.notifying.NotifyOwnerOfEarlierFind`.
+- Covered by [Matching](../design/compositions/matching.md), line 7.
+
+```reaction
+when Locating.locate (item: lost)
+where
+  Reporting._getReport (report: lost) has (category, kind: "LOST", reporter)
+  Locating._getNeighbors (item: lost) has (other: found)
+  Reporting._getOpen (category, kind: "FOUND") has (report: found)
+then
+  Notifying.notify (message: "An item that may be yours was already found.", recipient: reporter, subject: found)
+```
+
 ### matching.notifying.NotifyOwnerOfMatch
 
 Authored path: `matching.notifying.NotifyOwnerOfMatch`.
@@ -553,8 +569,7 @@ Authored path: `matching.notifying.NotifyOwnerOfMatch`.
 when Locating.locate (item: found)
 where
   Reporting._getReport (report: found) has (category, kind: "FOUND")
-  Locating._getPlacesOf (item: found) has (place)
-  Locating._getItemsAt (place) has (item: lost)
+  Locating._getNeighbors (item: found) has (other: lost)
   Reporting._getOpen (category, kind: "LOST") has (report: lost)
   Reporting._getReport (report: lost) has (reporter)
 then

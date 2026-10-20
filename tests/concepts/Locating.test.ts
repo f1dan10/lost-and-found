@@ -38,6 +38,8 @@ describe("Locating", () => {
     ]);
     expect(await locating._getSpot({ item: "tom-bottle" })).toEqual([{ spot: "by the lobby bench" }]);
     expect(await locating._getSpot({ item: "tamar-bottle" })).toEqual([]);
+    expect(await locating._getNeighbors({ item: "tom-bottle" })).toEqual([{ other: "tamar-bottle" }]);
+    expect(await locating._getNeighbors({ item: "tamar-bottle" })).toEqual([{ other: "tom-bottle" }]);
 
     const again = locating.locate({ item: "tom-bottle", places: [stata!] });
     await expect(again).rejects.toThrow(AlreadyLocated);
@@ -161,6 +163,19 @@ describe("Locating", () => {
     expect(await locating._getItemsAt({ place: a! })).toEqual([{ item: "found" }, { item: "lost" }]);
     expect(await locating._getItemsAt({ place: b! })).toEqual([{ item: "lost" }]);
     expect(await locating._getItemsAt({ place: c! })).toEqual([]);
+  });
+
+  test("neighbors share at least one place, each comes once however many places overlap, and an item is not its own", async () => {
+    const { locating } = await setup();
+    const [a, b, c] = await addPlaces(locating, ["A", "B", "C"]);
+    await locating.locate({ item: "lost", places: [a!, b!] });
+    await locating.locate({ item: "both", places: [a!, b!] });
+    await locating.locate({ item: "one", places: [b!, c!] });
+    await locating.locate({ item: "elsewhere", places: [c!] });
+
+    expect(await locating._getNeighbors({ item: "lost" })).toEqual([{ other: "both" }, { other: "one" }]);
+    expect(await locating._getNeighbors({ item: "elsewhere" })).toEqual([{ other: "one" }]);
+    expect(await locating._getNeighbors({ item: "nowhere" })).toEqual([]);
   });
 
   test("_unknown lists missing places in order without repeats, and everything is empty for the unknown", async () => {

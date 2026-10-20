@@ -8,7 +8,7 @@ Let things be found by where they are.
 
 ## Principle
 
-Tom locates a found bottle in Building 2, with the spot "by the lobby bench". Tamar doesn't know where she lost her bottle, so she locates it in Building 2, Stata, Building 34, and W20. When Sam looks at Building 2, he sees both bottles. When Tom locates his bottle again, he is refused with "This item already has a location." When Tom names a place nobody added, he is refused with "That place doesn't exist."
+Tom locates a found bottle in Building 2, with the spot "by the lobby bench". Tamar doesn't know where she lost her bottle, so she locates it in Building 2, Stata, Building 34, and W20. When Sam looks at Building 2, he sees both bottles, and each bottle is a neighbor of the other, once, because they share Building 2. When Tom locates his bottle again, he is refused with "This item already has a location." When Tom names a place nobody added, he is refused with "That place doesn't exist."
 
 ## Types
 
@@ -80,6 +80,9 @@ locate(item: Item, places: PlaceList, spot?: String) : returns (item: Item)
 ```queries
 _getItemsAt(place: Place) : many (item: Item)
   Returns each item that has this place, ordered by item identifier ascending. Returns no rows when nothing is there or the place is unknown.
+
+_getNeighbors(item: Item) : many (other: Item)
+  Returns each other item that has at least one of this item's places, once however many places they share, ordered by item identifier ascending. Returns no rows for an unlocated item or one that shares no place.
 
 _getPlacesOf(item: Item) : many (place: Place, name: String)
   Returns each place the item has, with its name, ordered by name and then place identifier. Returns no rows for an unlocated item.
