@@ -154,6 +154,48 @@ export type LostFoundWire = {
     };
     error: { error: AppWideError | "INVALID_INPUT" | "NOT_SIGNED_IN" };
   };
+  "/reports/mine": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
+    };
+    output: {
+      "reports": ({
+        "category": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["category"]>>;
+        "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["description"]>>;
+        "filedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["filedAt"]>>;
+        "kind": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["kind"]>>;
+        "photo": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>>>, ["photo"]>> | null;
+        "places": {
+          "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["name"]>>;
+          "place": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["place"]>>;
+        }[];
+        "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getByReporter"]>>>, ["report"]>]>>;
+        "spot": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>>>, ["spot"]>> | null;
+        "status": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["status"]>>;
+      })[];
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "NOT_SIGNED_IN" };
+  };
+  "/reports/resolve": {
+    input: {
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["resolve"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["resolve"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["resolve"]>>, ["report"]>]>]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["resolve"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["resolve"]>>, ["report"]>]>>;
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "NOT_FOUND" | "NOT_OPEN" | "NOT_SIGNED_IN" | "REPORT_NOT_FOUND" };
+  };
+  "/reports/withdraw": {
+    input: {
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>>, ["report"]>]>]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>>, ["report"]>]>>;
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "NOT_FOUND" | "NOT_OPEN" | "NOT_SIGNED_IN" | "REPORT_NOT_FOUND" };
+  };
 };
 
 export type HttpAppWideError = never;
@@ -281,5 +323,43 @@ export type LostFoundWireHttp = {
       })[];
     };
     error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
+  };
+  "/reports/mine": {
+    input: Record<string, never>;
+    output: {
+      "reports": ({
+        "category": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["category"]>>;
+        "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["description"]>>;
+        "filedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["filedAt"]>>;
+        "kind": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["kind"]>>;
+        "photo": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>>>, ["photo"]>> | null;
+        "places": {
+          "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["name"]>>;
+          "place": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["place"]>>;
+        }[];
+        "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getByReporter"]>>>, ["report"]>]>>;
+        "spot": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>>>, ["spot"]>> | null;
+        "status": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["status"]>>;
+      })[];
+    };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
+  };
+  "/reports/resolve": {
+    input: {
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["resolve"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["resolve"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["resolve"]>>, ["report"]>]>]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["resolve"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["resolve"]>>, ["report"]>]>>;
+    };
+    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
+  };
+  "/reports/withdraw": {
+    input: {
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>>, ["report"]>]>]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>>, ["report"]>]>>;
+    };
+    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
   };
 };

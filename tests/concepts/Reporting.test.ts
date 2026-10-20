@@ -103,6 +103,19 @@ describe("Reporting", () => {
     expect(await reporting._getOpen({ kind: "FOUND", category: "BOTTLE" })).toEqual([{ report: third }, { report: first }]);
   });
 
+  test("a reporter's own reports come newest first, whatever their status, and never another reporter's", async () => {
+    const { reporting } = await setup();
+    const { report: first } = await reporting.file(bottle);
+    const { report: second } = await reporting.file({ ...bottle, kind: "LOST" });
+    const { report: third } = await reporting.file(bottle);
+    await reporting.file({ ...bottle, reporter: SAM });
+    await reporting.withdraw({ report: first });
+    await reporting.resolve({ report: third });
+
+    expect(await reporting._getByReporter({ reporter: MAYA })).toEqual([{ report: third }, { report: second }, { report: first }]);
+    expect(await reporting._getByReporter({ reporter: "nobody" })).toEqual([]);
+  });
+
   test("a photo comes back exactly as filed, and a report with no photo, or an unknown one, has none", async () => {
     const { reporting } = await setup();
     const photo = "data:image/png;base64,iVBORw0KGgo=";

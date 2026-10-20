@@ -9,6 +9,14 @@ const messages: Record<string, Record<string, string>> = {
     FORBIDDEN: "You can't claim your own report.",
     NOT_FOUND: "This item is no longer available.",
   },
+  "/reports/withdraw": {
+    CONFLICT: "This report is already closed, so there is nothing to remove.",
+    NOT_FOUND: "You can only remove your own reports.",
+  },
+  "/reports/resolve": {
+    CONFLICT: "This report is already closed.",
+    NOT_FOUND: "You can only close your own reports.",
+  },
   "/notifications/read": { NOT_FOUND: "That notice is already gone." },
 };
 

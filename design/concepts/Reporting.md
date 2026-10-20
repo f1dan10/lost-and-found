@@ -84,6 +84,9 @@ withdraw(report: Report) : returns (report: Report)
 _getOpen(kind: Kind, category?: Category) : many (report: Report)
   Returns each report of this kind whose status is OPEN, limited to this category when one is given, newest filedAt first and then by report identifier descending. Returns no rows when none is open.
 
+_getByReporter(reporter: Reporter) : many (report: Report)
+  Returns each report this reporter filed, whatever its status, newest filedAt first and then by report identifier descending. Returns no rows when they filed none.
+
 _getReport(report: Report) : optional (reporter: Reporter, kind: Kind, category: Category, description: String, filedAt: DateTime, status: Status)
   Returns the report's details, or no row for an unknown report.
 

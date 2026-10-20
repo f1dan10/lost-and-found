@@ -94,6 +94,11 @@ export class ReportingConcept<Reporter extends string> {
     return found.map(({ _id }) => ({ report: _id }));
   }
 
+  async _getByReporter({ reporter }: { reporter: Reporter }) {
+    const found = await this.reports.find({ reporter }).sort({ filedAt: -1, _id: -1 }).toArray();
+    return found.map(({ _id }) => ({ report: _id }));
+  }
+
   async _getReport({ report }: { report: Report }) {
     const found = await this.reports.findOne({ _id: report });
     if (found === null) return [];

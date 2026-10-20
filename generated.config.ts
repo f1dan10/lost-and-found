@@ -23,6 +23,7 @@ export default {
       new URL("./design/compositions/matching.md", import.meta.url),
       new URL("./design/compositions/claims.md", import.meta.url),
       new URL("./design/compositions/notifications.md", import.meta.url),
+      new URL("./design/compositions/owning.md", import.meta.url),
     ],
   },
   projections: [httpWire({ policy: lostFoundPolicy("http://localhost:3000"), name: "LostFoundWireHttp" })],
