@@ -4,7 +4,7 @@ import { concepts } from "../concepts.ts";
 import { isOpenFound, owns } from "./access.ts";
 import { textInput } from "./reusable/inputs.ts";
 
-const { Sessioning, Claiming, Reporting, Notifying, Registering, Locating } = concepts;
+const { Sessioning, Claiming, Reporting, Notifying, Registering, Locating, Thanking } = concepts;
 
 /** How far back the Claimed tab looks. Older claims stay recorded in Claiming; they are only left out of the list. */
 const RECENT_DAYS = 30;
@@ -69,17 +69,19 @@ export const claimedCards = former(
 
 /**
  * Every item the user claimed, newest first and however long ago, with the building and spot to pick it up from
- * and the username of the person who found it.
+ * and the username of the person who found it. `thankedAt` and `thanksNote` are null until they thank the finder.
  */
 export const myClaims = former(
   "the claims of (user)",
-  ({ user }, { report, claimedAt, category, description, reporter, foundBy, place, name, spot, photo }) =>
+  ({ user }, { report, claimedAt, category, description, reporter, foundBy, place, name, spot, photo, thankedAt, thanksNote }) =>
     each(Claiming._byClaimant({ claimant: user }).is({ item: report, claimedAt }))
       .where(
         Reporting._getReport({ report }).is({ category, description, reporter }),
         Registering._username({ user: reporter }).is({ username: foundBy }),
         whether(Locating._getSpot({ item: report }).is({ spot })),
         whether(Reporting._getPhoto({ report }).is({ photo })),
+        whether(Thanking._getThanks({ item: report }).is({ thankedAt })),
+        whether(Thanking._getNote({ item: report }).is({ note: thanksNote })),
       )
       .form({
         report,
@@ -87,6 +89,8 @@ export const myClaims = former(
         category,
         description,
         foundBy,
+        thankedAt,
+        thanksNote,
         spot,
         photo,
         places: each(Locating._getPlacesOf({ item: report }).is({ place, name })).form({ place, name }),

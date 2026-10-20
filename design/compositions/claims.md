@@ -18,7 +18,7 @@ The Claimed tab shows what happened to found items, so a claimed item no longer 
 claims.listing.ListClaims at /claims/list
 ```
 
-The person who claimed an item still needs to know where to pick it up after the report is resolved. [The claims of a user](former:claims.listing.myClaims) are every item `Claiming._byClaimant` returns for them, newest first and however long ago, with the same details as above and the username of the person who found it, from Reporting and Registering. The [my claims endpoint](reaction:claims.listing.ListMyClaims) responds with them as `claims`, and only ever for the signed-in person.
+The person who claimed an item still needs to know where to pick it up after the report is resolved. [The claims of a user](former:claims.listing.myClaims) are every item `Claiming._byClaimant` returns for them, newest first and however long ago, with the same details as above, the username of the person who found it, from Reporting and Registering, and `thankedAt` and `thanksNote` from Thanking, which are `null` until they thank the finder, so the screen offers to thank only once. The [my claims endpoint](reaction:claims.listing.ListMyClaims) responds with them as `claims`, and only ever for the signed-in person.
 
 ```endpoints
 claims.listing.ListMyClaims at /claims/mine

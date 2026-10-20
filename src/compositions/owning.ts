@@ -4,7 +4,7 @@ import { concepts } from "../concepts.ts";
 import { owns } from "./access.ts";
 import { textInput } from "./reusable/inputs.ts";
 
-const { Sessioning, Reporting, Locating, Claiming, Registering } = concepts;
+const { Sessioning, Reporting, Locating, Claiming, Registering, Thanking } = concepts;
 
 // Closing
 
@@ -70,11 +70,12 @@ const RenewReport = endpoint(
 /**
  * Every report the user filed, newest first, open or closed, with its kind, status, and expiry so the screen can
  * offer the right actions, such as renewing one that has expired. The spot and the photo are null when a report has none. `claimedBy` is the username of whoever
- * claimed a found report, shown only here to the person who found it, and null while it is unclaimed.
+ * claimed a found report, shown only here to the person who found it, and null while it is unclaimed. `thankedAt`
+ * and `thanksNote` say when the claimant thanked them and what they wrote, and are null until then.
  */
 export const myReports = former(
   "the reports of (user)",
-  ({ user }, { report, kind, category, description, filedAt, expiresAt, status, place, name, spot, photo, claimant, claimedBy }) =>
+  ({ user }, { report, kind, category, description, filedAt, expiresAt, status, place, name, spot, photo, claimant, claimedBy, thankedAt, thanksNote }) =>
     each(Reporting._getByReporter({ reporter: user }).is({ report }))
       .where(
         Reporting._getReport({ report }).is({ kind, category, description, filedAt, expiresAt, status }),
@@ -82,6 +83,8 @@ export const myReports = former(
         whether(Reporting._getPhoto({ report }).is({ photo })),
         whether(Claiming._getClaimant({ item: report }).is({ claimant })),
         whether(Registering._username({ user: claimant }).is({ username: claimedBy })),
+        whether(Thanking._getThanks({ item: report }).is({ thankedAt })),
+        whether(Thanking._getNote({ item: report }).is({ note: thanksNote })),
       )
       .form({
         report,
@@ -92,6 +95,8 @@ export const myReports = former(
         expiresAt,
         status,
         claimedBy,
+        thankedAt,
+        thanksNote,
         spot,
         photo,
         places: each(Locating._getPlacesOf({ item: report }).is({ place, name })).form({ place, name }),

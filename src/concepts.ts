@@ -6,6 +6,7 @@ import { notifying } from "./concepts/Notifying/registry.ts";
 import { registering } from "./concepts/Registering/registry.ts";
 import { reporting } from "./concepts/Reporting/registry.ts";
 import { sessioning } from "./concepts/Sessioning/registry.ts";
+import { thanking } from "./concepts/Thanking/registry.ts";
 
 export const applicationConceptSet = conceptSet({
   Registering: registering,
@@ -15,6 +16,7 @@ export const applicationConceptSet = conceptSet({
   Locating: locating,
   Notifying: notifying,
   Claiming: claiming,
+  Thanking: thanking,
 });
 
 export const { concepts } = applicationConceptSet;

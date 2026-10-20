@@ -21,6 +21,11 @@ const messages: Record<string, Record<string, string>> = {
     CONFLICT: "This report is closed, so it can't be renewed.",
     NOT_FOUND: "You can only renew your own reports.",
   },
+  "/thanks/send": {
+    INVALID_REQUEST: "Keep the note under 140 characters, or send your thanks with no note.",
+    CONFLICT: "You already thanked the finder for this item.",
+    NOT_FOUND: "You can only thank the finder of an item you claimed.",
+  },
   "/notifications/read": { NOT_FOUND: "That notice is already gone." },
 };
 

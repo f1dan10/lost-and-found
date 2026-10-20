@@ -169,6 +169,27 @@ Defined in [Sessioning](../design/concepts/Sessioning.md), line 1.
 - `Sessioning` — instance of `Sessioning` — [Lost&Found types](../design/types.md), line 11.
   - `Subject` is `Registering.User` — [Lost&Found types](../design/types.md), line 12.
 
+### Thanking
+
+Defined in [Thanking](../design/concepts/Thanking.md), line 1.
+
+#### Actions
+
+- `thank(thanker: Thanker, item: Item, note?: String) : returns (item: Item)`
+  - Refuses `INVALID_NOTE`: A thank-you note must have 1 to 140 characters.
+  - Refuses `ALREADY_THANKED`: This has already been thanked for.
+
+#### Queries
+
+- `_getThanks(item: Item) : optional (thanker: Thanker, thankedAt: DateTime)`
+- `_getNote(item: Item) : optional (note: String)`
+
+#### Instances
+
+- `Thanking` — instance of `Thanking` — [Lost&Found types](../design/types.md), line 28.
+  - `Item` is `Reporting.Report` — [Lost&Found types](../design/types.md), line 30.
+  - `Thanker` is `Registering.User` — [Lost&Found types](../design/types.md), line 29.
+
 ## Views
 
 _Views name reusable conditions. Multiple `where` blocks are alternatives._
@@ -191,6 +212,17 @@ Authored path: `access.permissions.isOpenFound`.
 ```view
 (report) is an open found report — inputs (report); outputs (); bindings ()
   where Reporting._getOpen (kind: "FOUND") has (report)
+```
+
+### (user) claimed (report)
+
+Authored path: `access.permissions.claimed`.
+- Covered by [Access](../design/compositions/access.md), line 9.
+- Covered by [Thanks](../design/compositions/thanks.md), line 3.
+
+```view
+(user) claimed (report) — inputs (user, report); outputs (); bindings ()
+  where Claiming._getClaimant (item: report) has (claimant: user)
 ```
 
 ### (user) has the unread (notification)
@@ -240,12 +272,14 @@ Authored path: `claims.listing.myClaims`.
 - Covered by [Claims](../design/compositions/claims.md), line 21.
 
 ```former
-Former "the claims of (user)" — inputs (user); bindings (report, claimedAt, category, description, reporter, foundBy, place, name, spot, photo); promises exactly one record — forms:
+Former "the claims of (user)" — inputs (user); bindings (report, claimedAt, category, description, reporter, foundBy, place, name, spot, photo, thankedAt, thanksNote); promises exactly one record — forms:
   each Claiming._byClaimant (claimant: user) has (claimedAt, item: report)
     where Reporting._getReport (report) has (category, description, reporter)
     where Registering._username (user: reporter) has (username: foundBy)
     where whether Locating._getSpot (item: report) has (spot)
     where whether Reporting._getPhoto (report) has (photo)
+    where whether Thanking._getThanks (item: report) has (thankedAt)
+    where whether Thanking._getNote (item: report) has (note: thanksNote)
     form a record of
       category
       claimedAt
@@ -258,6 +292,8 @@ Former "the claims of (user)" — inputs (user); bindings (report, claimedAt, ca
           place
       report
       spot
+      thankedAt
+      thanksNote
 ```
 
 ### the open reports of (kind)
@@ -318,13 +354,15 @@ Authored path: `owning.listing.myReports`.
 - Covered by [Owning](../design/compositions/owning.md), line 21.
 
 ```former
-Former "the reports of (user)" — inputs (user); bindings (report, kind, category, description, filedAt, expiresAt, status, place, name, spot, photo, claimant, claimedBy); promises exactly one record — forms:
+Former "the reports of (user)" — inputs (user); bindings (report, kind, category, description, filedAt, expiresAt, status, place, name, spot, photo, claimant, claimedBy, thankedAt, thanksNote); promises exactly one record — forms:
   each Reporting._getByReporter (reporter: user) has (report)
     where Reporting._getReport (report) has (category, description, expiresAt, filedAt, kind, status)
     where whether Locating._getSpot (item: report) has (spot)
     where whether Reporting._getPhoto (report) has (photo)
     where whether Claiming._getClaimant (item: report) has (claimant)
     where whether Registering._username (user: claimant) has (username: claimedBy)
+    where whether Thanking._getThanks (item: report) has (thankedAt)
+    where whether Thanking._getNote (item: report) has (note: thanksNote)
     form a record of
       category
       claimedBy
@@ -340,6 +378,8 @@ Former "the reports of (user)" — inputs (user); bindings (report, kind, catego
       report
       spot
       status
+      thankedAt
+      thanksNote
 ```
 
 ### the unread notifications of (user)
@@ -1149,6 +1189,75 @@ then
   RequestBoundary.respond (error: "INVALID_CREDENTIALS", requestId)
 ```
 
+### thanks.sending.NotifyFinderOfThanks
+
+Authored path: `thanks.sending.NotifyFinderOfThanks`.
+- Covered by [Thanks](../design/compositions/thanks.md), line 9.
+
+```reaction
+when Thanking.thank (item: report)
+where
+  Reporting._getReport (report) has (reporter)
+then
+  Notifying.notify (message: "The owner of an item you found thanked you.", recipient: reporter, subject: report)
+```
+
+### thanks.sending.SendThanks
+
+Authored path: `thanks.sending.SendThanks`.
+- Covered by [Thanks](../design/compositions/thanks.md), line 3.
+- Covered by [Thanks](../design/compositions/thanks.md), line 6.
+
+```reaction
+when RequestBoundary.request (note, path: "/thanks/send", report, requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### thanks.sending.SendThanks:refused#2
+
+Authored path: `thanks.sending.SendThanks`.
+- Covered by [Thanks](../design/compositions/thanks.md), line 3.
+- Covered by [Thanks](../design/compositions/thanks.md), line 6.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by thanks.sending.SendThanks
+where
+  earlier, RequestBoundary.request (note, path: "/thanks/send", report, requestId, session)
+  no view "(user) claimed (report)" with (report, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### thanks.sending.SendThanks:thanked#2
+
+Authored path: `thanks.sending.SendThanks`.
+- Covered by [Thanks](../design/compositions/thanks.md), line 3.
+- Covered by [Thanks](../design/compositions/thanks.md), line 6.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by thanks.sending.SendThanks
+where
+  earlier, RequestBoundary.request (note, path: "/thanks/send", report, requestId, session)
+  view "(user) claimed (report)" with (report, user)
+then
+  Thanking.thank (item: report, note, thanker: user)
+```
+
+### thanks.sending.SendThanks:thanked#3
+
+Authored path: `thanks.sending.SendThanks`.
+- Covered by [Thanks](../design/compositions/thanks.md), line 3.
+- Covered by [Thanks](../design/compositions/thanks.md), line 6.
+
+```reaction
+when Thanking.thank (item: report, note, thanker: user), asked by thanks.sending.SendThanks:thanked#2
+where
+  earlier, RequestBoundary.request (note, path: "/thanks/send", report, requestId, session)
+then
+  RequestBoundary.respond (report, requestId)
+```
+
 ## Endpoint input contracts
 
 Before recording an action ask, the boundary rejects a body that is not an
@@ -1172,3 +1281,4 @@ not listed here have no explicit input contract.
 - `/reports/renew` — requires `report`, `session`
 - `/reports/resolve` — requires `report`, `session`
 - `/reports/withdraw` — requires `report`, `session`
+- `/thanks/send` — requires `session`, `report`; fills `note` with null when absent

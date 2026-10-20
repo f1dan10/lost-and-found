@@ -89,8 +89,10 @@ export type LostFoundWire = {
           "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["name"]>>;
           "place": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["place"]>>;
         }[];
-        "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["_byClaimant"]>>>, ["item"]>]>>;
+        "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getNote"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getThanks"]>[0], ["item"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["_byClaimant"]>>>, ["item"]>]>>;
         "spot": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>>>, ["spot"]>> | null;
+        "thankedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getThanks"]>>>, ["thankedAt"]>> | null;
+        "thanksNote": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getNote"]>>>, ["note"]>> | null;
       })[];
     };
     error: { error: AppWideError | "INVALID_INPUT" | "NOT_SIGNED_IN" };
@@ -214,9 +216,11 @@ export type LostFoundWire = {
           "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["name"]>>;
           "place": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["place"]>>;
         }[];
-        "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["_getClaimant"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getByReporter"]>>>, ["report"]>]>>;
+        "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["_getClaimant"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getNote"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getThanks"]>[0], ["item"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getByReporter"]>>>, ["report"]>]>>;
         "spot": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>>>, ["spot"]>> | null;
         "status": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["status"]>>;
+        "thankedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getThanks"]>>>, ["thankedAt"]>> | null;
+        "thanksNote": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getNote"]>>>, ["note"]>> | null;
       })[];
     };
     error: { error: AppWideError | "INVALID_INPUT" | "NOT_SIGNED_IN" };
@@ -250,6 +254,17 @@ export type LostFoundWire = {
       "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>>, ["report"]>]>>;
     };
     error: { error: AppWideError | "INVALID_INPUT" | "NOT_FOUND" | "NOT_OPEN" | "NOT_SIGNED_IN" | "REPORT_NOT_FOUND" };
+  };
+  "/thanks/send": {
+    input: {
+      "note"?: Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>[0], ["note"]>>;
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["_getClaimant"]>[0], ["item"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>>, ["item"]>]>]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>>, ["item"]>]>>;
+    };
+    error: { error: AppWideError | "ALREADY_THANKED" | "INVALID_INPUT" | "INVALID_NOTE" | "NOT_FOUND" | "NOT_SIGNED_IN" | "UNKNOWN_RECIPIENT" };
   };
 };
 
@@ -319,8 +334,10 @@ export type LostFoundWireHttp = {
           "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["name"]>>;
           "place": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["place"]>>;
         }[];
-        "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["_byClaimant"]>>>, ["item"]>]>>;
+        "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getNote"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getThanks"]>[0], ["item"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Claiming"]["_byClaimant"]>>>, ["item"]>]>>;
         "spot": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>>>, ["spot"]>> | null;
+        "thankedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getThanks"]>>>, ["thankedAt"]>> | null;
+        "thanksNote": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getNote"]>>>, ["note"]>> | null;
       })[];
     };
     error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
@@ -433,9 +450,11 @@ export type LostFoundWireHttp = {
           "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["name"]>>;
           "place": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["place"]>>;
         }[];
-        "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["_getClaimant"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getByReporter"]>>>, ["report"]>]>>;
+        "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["_getClaimant"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getNote"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getThanks"]>[0], ["item"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getByReporter"]>>>, ["report"]>]>>;
         "spot": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>>>, ["spot"]>> | null;
         "status": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["status"]>>;
+        "thankedAt": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getThanks"]>>>, ["thankedAt"]>> | null;
+        "thanksNote": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["_getNote"]>>>, ["note"]>> | null;
       })[];
     };
     error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
@@ -466,5 +485,15 @@ export type LostFoundWireHttp = {
       "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>[0], ["report"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["withdraw"]>>, ["report"]>]>>;
     };
     error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
+  };
+  "/thanks/send": {
+    input: {
+      "note"?: Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>[0], ["note"]>>;
+      "report": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Claiming"]["_getClaimant"]>[0], ["item"]>]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>>, ["item"]>]>]>>;
+    };
+    output: {
+      "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Thanking"]["thank"]>>, ["item"]>]>>;
+    };
+    error: { error: HttpAppWideError | "CONFLICT" | "INTERNAL_ERROR" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
   };
 };
