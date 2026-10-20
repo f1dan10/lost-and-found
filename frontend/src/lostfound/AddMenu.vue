@@ -15,11 +15,11 @@ function add(kind: "found" | "lost") {
 <template>
   <div class="add-menu">
     <div v-if="open" class="options">
-      <button type="button" class="button lost" @click="add('lost')">Add Lost Item</button>
-      <button type="button" class="button found" @click="add('found')">Add Found Item</button>
+      <button type="button" class="button lost" @click="add('lost')"><Icon name="search" :size="18" />I lost something</button>
+      <button type="button" class="button found" @click="add('found')"><Icon name="pin" :size="18" />I found something</button>
     </div>
     <button type="button" class="fab" :class="{ open }" :aria-expanded="open" aria-label="Add a report" @click="open = !open">
-      <Icon name="plus" :size="26" />
+      <Icon name="plus" :size="30" />
     </button>
     <ReportForm v-if="adding" :kind="adding" @close="adding = null" />
   </div>
@@ -28,8 +28,8 @@ function add(kind: "found" | "lost") {
 <style scoped>
 .add-menu {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
+  right: calc(24px + env(safe-area-inset-right, 0px));
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -41,6 +41,10 @@ function add(kind: "found" | "lost") {
   flex-direction: column;
   align-items: flex-end;
   gap: var(--space-2);
+}
+.options .button {
+  min-height: 48px;
+  padding: 0 20px;
 }
 .button.found {
   color: #ffffff;
@@ -55,8 +59,8 @@ function add(kind: "found" | "lost") {
 .fab {
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border: 0;
   border-radius: var(--radius-full);
   background: var(--color-accent);
@@ -65,5 +69,11 @@ function add(kind: "found" | "lost") {
 }
 .fab.open :deep(svg) {
   transform: rotate(45deg);
+}
+/* Above the bottom tab bar on a phone. */
+@media (max-width: 640px) {
+  .add-menu {
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  }
 }
 </style>

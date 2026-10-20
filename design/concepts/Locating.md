@@ -8,7 +8,7 @@ Let things be found by where they are.
 
 ## Principle
 
-Tom locates a found bottle in Building 2, with the spot "by the lobby bench". Tamar doesn't know where she lost her bottle, so she locates it in Building 2, Stata, Building 34, and W20. When Sam looks at Building 2, he sees both bottles, and each bottle is a neighbor of the other, once, because they share Building 2. When Tom locates his bottle again, he is refused with "This item already has a location." When Tom names a place nobody added, he is refused with "That place doesn't exist."
+Tom locates a found bottle in Building 2, with the spot "by the lobby bench". Tamar doesn't know where she lost her bottle, so she locates it in Building 2, Stata, Building 34, and W20. When Sam looks at Building 2, he sees both bottles, and each bottle is a neighbor of the other, once, because they share Building 2. When Tom locates his bottle again, he is refused with "This item already has a location." When Tom names a place nobody added, he is refused with "That place doesn't exist." When Building 2 turns out to be drawn in the wrong spot, it is repositioned, and both bottles are still there.
 
 ## Types
 
@@ -51,6 +51,18 @@ addPlace(name: String, latitude: Number, longitude: Number) : returns (place: Pl
   where the place is acceptable and no place has the trimmed name
   then
     add a new place with the trimmed name, latitude, and longitude
+    returns place
+
+reposition(place: Place, latitude: Number, longitude: Number) : returns (place: Place)
+  where latitude or longitude is not a number on Earth
+  then
+    refuses INVALID_PLACE "A place needs a name of 1 to 60 characters and a latitude and longitude on Earth."
+  where place is not in Places
+  then
+    refuses UNKNOWN_PLACE "That place doesn't exist."
+  where the coordinates are acceptable and place is in Places
+  then
+    set the latitude and longitude of place, keeping its name and every item in it
     returns place
 
 locate(item: Item, places: PlaceList, spot?: String) : returns (item: Item)

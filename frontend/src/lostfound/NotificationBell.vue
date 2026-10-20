@@ -3,25 +3,31 @@ import { computed } from "vue";
 import Icon from "../reusable/ui/Icon.vue";
 import Menu from "../reusable/ui/Menu.vue";
 import { categoryLabel, timeAgo } from "./format.ts";
-import { type Notification, useLostFound } from "./useLostFound.ts";
+import { type Notification, type Tab, useLostFound } from "./useLostFound.ts";
 
-const { reports, notifications, tab, highlight, markRead, working } = useLostFound();
+const { reports, claims, myClaims, mine, notifications, tab, highlight, markRead, working } = useLostFound();
 
 const count = computed(() => notifications.value.length);
 const badge = computed(() => (count.value > 9 ? "9+" : String(count.value)));
 
 /**
- * Opens the notice: marks it read, and when the report it is about is still in the found or lost list, shows that
- * tab and points at the card. A claim notice has no card, because a claimed report is no longer open, so it only shows its text.
+ * Opens the notice: marks it read, then shows the tab where the report it is about lives now and points at its card.
+ * A match opens the Found list; a claim or a thank-you on my report, or an item I claimed, opens Yours; a report
+ * someone else claimed opens Claimed. A notice about a report that is in none of them only shows its text.
  */
 async function open(notice: Notification) {
-  const kind = reports.value.found.some((card) => card.report === notice.subject)
+  const is = (row: { report: string }) => row.report === notice.subject;
+  const where: Tab | null = reports.value.found.some(is)
     ? "found"
-    : reports.value.lost.some((card) => card.report === notice.subject)
+    : reports.value.lost.some(is)
       ? "lost"
-      : null;
-  if (kind) {
-    tab.value = kind;
+      : myClaims.value.some(is) || mine.value.some(is)
+        ? "yours"
+        : claims.value.some(is)
+          ? "claimed"
+          : null;
+  if (where) {
+    tab.value = where;
     highlight.value = notice.subject;
   }
   await markRead(notice.notification);
@@ -114,10 +120,10 @@ ul {
 .claimed {
   font-size: var(--text-sm);
   font-weight: 700;
-  color: var(--color-found);
+  color: var(--color-claimed);
 }
 .read {
-  min-height: 32px;
+  min-height: 36px;
   font-size: var(--text-xs);
 }
 </style>

@@ -25,6 +25,18 @@ describe("seedPlaces", () => {
     expect(await locating._getPlaces()).toEqual(before);
   });
 
+  test("a place the Alpha seeded somewhere else is moved to its new position, keeping its id and its items", async () => {
+    const database = await testDatabase();
+    const locating = new LocatingConcept<string>(database, "Locating");
+    const { place } = await locating.addPlace({ name: "Building 2", latitude: 42.3594, longitude: -71.0924 });
+    await locating.locate({ item: "bottle", places: [place] });
+
+    await seedPlaces(database);
+    const b2 = (await locating._getPlaces()).find(({ name }) => name === "Building 2");
+    expect(b2).toEqual({ place, name: "Building 2", latitude: 42.3588, longitude: -71.09023 });
+    expect(await locating._getItemsAt({ place })).toEqual([{ item: "bottle" }]);
+  });
+
   test("every latitude and longitude is on Earth", () => {
     for (const { latitude, longitude } of PLACES) {
       expect(Math.abs(latitude)).toBeLessThanOrEqual(90);

@@ -59,6 +59,9 @@ Defined in [Locating](../design/concepts/Locating.md), line 1.
 - `addPlace(name: String, latitude: Number, longitude: Number) : returns (place: Place)`
   - Refuses `INVALID_PLACE`: A place needs a name of 1 to 60 characters and a latitude and longitude on Earth.
   - Refuses `PLACE_EXISTS`: There is already a place with that name.
+- `reposition(place: Place, latitude: Number, longitude: Number) : returns (place: Place)`
+  - Refuses `INVALID_PLACE`: A place needs a name of 1 to 60 characters and a latitude and longitude on Earth.
+  - Refuses `UNKNOWN_PLACE`: That place doesn't exist.
 - `locate(item: Item, places: PlaceList, spot?: String) : returns (item: Item)`
   - Refuses `NO_PLACES`: An item needs at least one place.
   - Refuses `TOO_MANY_PLACES`: An item can be in at most 12 places.

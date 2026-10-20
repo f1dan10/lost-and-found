@@ -74,6 +74,16 @@ export class LocatingConcept<Item extends string> {
     return { place };
   }
 
+  /** Moves a place on the map; its name and the items in it stay as they are. */
+  async reposition({ place, latitude, longitude }: { place: Place; latitude: number; longitude: number }) {
+    if (!isCoordinate(latitude, 90) || !isCoordinate(longitude, 180)) {
+      throw new InvalidPlace("A place needs a name of 1 to 60 characters and a latitude and longitude on Earth.");
+    }
+    const { matchedCount } = await this.places.updateOne({ _id: place }, { $set: { latitude, longitude } });
+    if (matchedCount === 0) throw new UnknownPlace("That place doesn't exist.");
+    return { place };
+  }
+
   async locate({ item, places, spot }: { item: Item; places: PlaceList; spot?: string }) {
     const different = Array.isArray(places) ? [...new Set(places)] : [];
     if (different.length === 0) throw new NoPlaces("An item needs at least one place.");

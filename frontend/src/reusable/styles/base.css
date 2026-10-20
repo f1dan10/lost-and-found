@@ -23,8 +23,9 @@ body {
 
 h1,
 h2 {
+  font-family: var(--font-heading);
   line-height: 1.2;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 h2 {
@@ -32,7 +33,9 @@ h2 {
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
   color: inherit;
 }
@@ -102,7 +105,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: 40px;
+  min-height: var(--tap);
   padding: 0 var(--space-4);
   border: 0;
   border-radius: var(--radius-full);
@@ -112,7 +115,7 @@ button:disabled {
 }
 
 .button.primary {
-  color: #ffffff;
+  color: var(--color-on-accent);
   background: var(--color-accent);
 }
 
@@ -133,7 +136,7 @@ button:disabled {
 }
 
 .button.large {
-  min-height: 46px;
+  min-height: 48px;
   border-radius: var(--radius-md);
   font-weight: 700;
 }
@@ -142,13 +145,18 @@ button:disabled {
   filter: brightness(0.95);
 }
 
+.button.primary:hover:not(:disabled) {
+  filter: none;
+  background: #33353b;
+}
+
 /* A round button that shows only an icon; give it an aria-label. */
 .icon-button {
   display: grid;
   place-items: center;
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: var(--tap);
+  height: var(--tap);
   padding: 0;
   border: 0;
   border-radius: 50%;

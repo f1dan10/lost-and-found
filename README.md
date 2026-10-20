@@ -22,6 +22,10 @@ Personal project for 6.1040 Software Design, Fall 2026.
 3. [Screen recording of the journey](design/demo.mp4), about two minutes
 4. Concept specifications are in [design/concepts](design/concepts), compositions in [design/compositions](design/compositions), and the types each concept is instantiated with in [design/types.md](design/types.md).
 
+## P3: Beta
+
+1. [Visual design study](design/visual-study/README.md): two slides, on typography and colour, with notes on what I used.
+
 ### Run it
 
 You need [Bun](https://bun.sh) and a MongoDB server.

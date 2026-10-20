@@ -1,26 +1,35 @@
 :root {
-  /* Palette */
-  --color-page: #f3f4f9;
+  /*
+   * Palette: ink on paper. The chrome is neutral, so the only colours on screen mean something:
+   * blue is found, orange is lost, graphite is claimed. See design/visual-study/README.md.
+   */
+  --color-page: #f4f4f1;
   --color-surface: #ffffff;
-  --color-text: #1e1f2b;
-  --color-text-muted: #646779;
-  --color-line: #eeeff6;
-  --color-border: #d9dbea;
-  --color-accent: #4338ca;
-  --color-accent-strong: #312a99;
-  --color-accent-soft: #eceafd;
+  --color-text: #191a1e;
+  --color-text-muted: #5d5f66;
+  --color-line: #ecebe6;
+  --color-border: #dedcd6;
+  /* Primary actions are ink, not a brand colour, so they never read as found or lost. */
+  --color-accent: #191a1e;
+  --color-accent-strong: #000000;
+  --color-accent-soft: #ecebe6;
+  --color-on-accent: #ffffff;
   --color-danger: #b42318;
-  --color-danger-soft: #fdf1ef;
-  --color-tip: #1e1f2b;
+  --color-danger-soft: #fbeeec;
+  --color-tip: #191a1e;
 
-  /* Found items are blue and lost items are orange, chosen to be colour-blind safe. Colour is never the only cue: a label and an icon go with it. */
+  /* Found is blue and lost is orange, a pair that stays apart for every common colour blindness. Colour is never the only cue: a label and an icon go with it. */
   --color-found: #0369a1;
-  --color-found-soft: #e0f2fe;
+  --color-found-soft: #e3f1fa;
   --color-lost: #c2410c;
-  --color-lost-soft: #fff1e3;
+  --color-lost-soft: #fcefe6;
+  /* A claimed item is finished, so it goes quiet: graphite with a check. */
+  --color-claimed: #475467;
+  --color-claimed-soft: #eceef2;
 
-  /* Typography */
-  --font-sans: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  /* Typography: Source Serif 4 for item titles and headings, Public Sans for everything else. */
+  --font-heading: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --text-xs: 0.8125rem;
   --text-sm: 0.875rem;
   --text-base: 0.9375rem;
@@ -28,6 +37,9 @@
   --text-xl: 1.25rem;
   --text-2xl: 1.625rem;
   --leading: 1.5;
+
+  /* Fitts's law: anything people tap is at least this tall. */
+  --tap: 44px;
 
   /* Spacing: a 4px scale */
   --space-1: 4px;
@@ -47,7 +59,7 @@
   --radius-full: 999px;
 
   /* Shadow */
-  --shadow-card: 0 1px 3px rgba(30, 31, 43, 0.08);
-  --shadow-popover: 0 10px 30px rgba(30, 31, 43, 0.18);
-  --shadow-dialog: 0 20px 60px rgba(30, 31, 43, 0.3);
+  --shadow-card: 0 1px 3px rgba(25, 26, 30, 0.08);
+  --shadow-popover: 0 10px 30px rgba(25, 26, 30, 0.18);
+  --shadow-dialog: 0 20px 60px rgba(25, 26, 30, 0.3);
 }

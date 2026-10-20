@@ -1,46 +1,74 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import Icon from "../reusable/ui/Icon.vue";
+import CampusMap, { type MapTile } from "./CampusMap.vue";
 import ClaimDialog from "./ClaimDialog.vue";
 import ReportCard from "./ReportCard.vue";
-import { type Card, useLostFound } from "./useLostFound.ts";
+import { type Card, type CardLike, useLostFound } from "./useLostFound.ts";
 
-/** One tile per building with how many found and lost reports are open there, grouped on the client from the lists already fetched. */
+/**
+ * The Map tab: where found and lost things are, by building. The map is the default view; the list of building tiles
+ * shows the same counts and works with a keyboard and a screen reader. Choosing a building lists its reports below.
+ * The counts are grouped on the client from the lists already fetched.
+ */
 const { reports, places } = useLostFound();
+const view = ref<"map" | "list">("map");
+const show = ref<"both" | "found" | "lost">("both");
 const selected = ref<string | null>(null);
-const claiming = ref<Card | null>(null);
+const claiming = ref<CardLike | null>(null);
 
-const tiles = computed(() =>
+const at = (cards: Card[], place: string) => cards.filter((card) => card.places.some((entry) => entry.place === place));
+
+const tiles = computed<MapTile[]>(() =>
   [...places.value]
-    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
     .map((place) => ({
       ...place,
-      found: reports.value.found.filter((card) => card.places.some((entry) => entry.place === place.place)).length,
-      lost: reports.value.lost.filter((card) => card.places.some((entry) => entry.place === place.place)).length,
+      found: show.value === "lost" ? 0 : at(reports.value.found, place.place).length,
+      lost: show.value === "found" ? 0 : at(reports.value.lost, place.place).length,
     })),
 );
 
 /** The open cards at the selected building, found and lost together, newest first. */
 const here = computed(() => {
-  const at = selected.value;
-  if (at === null) return [];
-  const mark = (cards: Card[], kind: "found" | "lost") =>
-    cards.filter((card) => card.places.some((entry) => entry.place === at)).map((card) => ({ card, kind }));
-  return [...mark(reports.value.found, "found"), ...mark(reports.value.lost, "lost")].sort(
-    (a, b) => new Date(b.card.filedAt).getTime() - new Date(a.card.filedAt).getTime(),
-  );
+  const place = selected.value;
+  if (place === null) return [];
+  const found = show.value === "lost" ? [] : at(reports.value.found, place).map((card) => ({ card, kind: "found" as const }));
+  const lost = show.value === "found" ? [] : at(reports.value.lost, place).map((card) => ({ card, kind: "lost" as const }));
+  return [...found, ...lost].sort((a, b) => new Date(b.card.filedAt).getTime() - new Date(a.card.filedAt).getTime());
 });
-const selectedName = computed(() => tiles.value.find((tile) => tile.place === selected.value)?.name ?? "");
+const selectedName = computed(() => places.value.find((place) => place.place === selected.value)?.name ?? "");
 
 function choose(place: string) {
   selected.value = selected.value === place ? null : place;
 }
-
 </script>
 
 <template>
   <section class="board">
-    <div class="grid">
+    <header class="tab-intro">
+      <h2>Where things are</h2>
+      <p>Each building shows how many things were found there and how many people lost something there. Choose one to see them.</p>
+    </header>
+
+    <div class="controls">
+      <div class="filters" role="group" aria-label="Show">
+        <button type="button" class="filter" :class="{ on: show === 'both' }" :aria-pressed="show === 'both'" @click="show = 'both'">Found and lost</button>
+        <button type="button" class="filter" :class="{ on: show === 'found' }" :aria-pressed="show === 'found'" @click="show = 'found'">
+          <Icon name="pin" :size="14" />Found only
+        </button>
+        <button type="button" class="filter" :class="{ on: show === 'lost' }" :aria-pressed="show === 'lost'" @click="show = 'lost'">
+          <Icon name="search" :size="14" />Lost only
+        </button>
+      </div>
+      <div class="filters" role="group" aria-label="View">
+        <button type="button" class="filter" :class="{ on: view === 'map' }" :aria-pressed="view === 'map'" @click="view = 'map'"><Icon name="map" :size="14" />Map</button>
+        <button type="button" class="filter" :class="{ on: view === 'list' }" :aria-pressed="view === 'list'" @click="view = 'list'"><Icon name="list" :size="14" />List</button>
+      </div>
+    </div>
+
+    <CampusMap v-if="view === 'map'" :tiles="tiles" :selected="selected" @select="choose" />
+    <div v-else class="grid">
       <button
         v-for="tile in tiles"
         :key="tile.place"
@@ -51,20 +79,23 @@ function choose(place: string) {
         @click="choose(tile.place)"
       >
         <span class="name">{{ tile.name }}</span>
-        <span class="counts">
-          <span class="count found" aria-hidden="true"><Icon name="pin" :size="16" />{{ tile.found }} found</span>
-          <span class="count lost" aria-hidden="true"><Icon name="search" :size="16" />{{ tile.lost }} lost</span>
+        <span class="counts" aria-hidden="true">
+          <span v-if="show !== 'lost'" class="count found"><Icon name="pin" :size="16" />{{ tile.found }} found</span>
+          <span v-if="show !== 'found'" class="count lost"><Icon name="search" :size="16" />{{ tile.lost }} lost</span>
         </span>
-        <span class="sr">{{ tile.found }} found, {{ tile.lost }} lost</span>
+        <span class="sr-only">{{ tile.found }} found, {{ tile.lost }} lost</span>
       </button>
     </div>
 
     <section v-if="selected !== null" class="here" aria-live="polite">
-      <h2>{{ selectedName }}</h2>
+      <div class="here-head">
+        <h3>{{ selectedName }}</h3>
+        <button type="button" class="button outline" @click="selected = null">Clear</button>
+      </div>
       <div v-if="here.length" class="tiles">
         <ReportCard v-for="entry in here" :key="entry.card.report" :card="entry.card" :kind="entry.kind" @claim="claiming = $event" />
       </div>
-      <p v-else class="muted">Nothing has been reported at {{ selectedName }}.</p>
+      <p v-else class="muted">Nothing {{ show === "both" ? "has been reported" : show === "found" ? "has been found" : "was lost" }} at {{ selectedName }}.</p>
     </section>
     <ClaimDialog v-if="claiming" :card="claiming" @close="claiming = null" />
   </section>
@@ -74,18 +105,29 @@ function choose(place: string) {
 .board {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-4);
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: var(--space-3);
 }
 .tile {
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  min-height: 88px;
   padding: var(--space-4);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -94,12 +136,12 @@ function choose(place: string) {
   box-shadow: var(--shadow-card);
 }
 .tile.on {
-  border-color: var(--color-accent);
-  outline: 2px solid var(--color-accent);
+  border-color: var(--color-text);
+  outline: 2px solid var(--color-text);
 }
 .tile.empty {
-  opacity: 0.55;
   box-shadow: none;
+  color: var(--color-text-muted);
 }
 .name {
   font-weight: 700;
@@ -121,17 +163,25 @@ function choose(place: string) {
 .count.lost {
   color: var(--color-lost);
 }
-.sr {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+.tile.empty .count {
+  color: var(--color-text-muted);
+  font-weight: 500;
 }
 .here {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+.here-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.here-head h3 {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 600;
 }
 </style>

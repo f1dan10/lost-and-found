@@ -1,27 +1,27 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue";
-import Icon from "./reusable/ui/Icon.vue";
+import Icon, { type IconName } from "./reusable/ui/Icon.vue";
 import AddMenu from "./lostfound/AddMenu.vue";
 import BuildingBoard from "./lostfound/BuildingBoard.vue";
+import ClaimedList from "./lostfound/ClaimedList.vue";
 import ReportList from "./lostfound/ReportList.vue";
+import YoursPanel from "./lostfound/YoursPanel.vue";
 import { type Tab, useLostFound } from "./lostfound/useLostFound.ts";
 
-const { reports, tab, loaded, error, startPolling, reset } = useLostFound();
+const { reports, claims, myClaims, mine, tab, loaded, error, toast, startPolling, reset } = useLostFound();
 
 onMounted(startPolling);
 // Leaving the page means signing out or a session that ended: stop polling and forget the lists.
 onUnmounted(reset);
 
-/** The buildings that have at least one open report, for the Board tab's count. */
-const busy = computed(() => {
-  const names = new Set<string>();
-  for (const card of [...reports.value.found, ...reports.value.lost]) for (const place of card.places) names.add(place.place);
-  return names.size;
-});
-const tabs = computed<{ id: Tab; label: string; count: number }[]>(() => [
-  { id: "found", label: "Found", count: reports.value.found.length },
-  { id: "lost", label: "Lost", count: reports.value.lost.length },
-  { id: "board", label: "Board", count: busy.value },
+/** Things in Yours that need me: claims to pick up and expired reports to renew. */
+const yoursCount = computed(() => myClaims.value.length + mine.value.filter((report) => report.status === "OPEN").length);
+const tabs = computed<{ id: Tab; label: string; icon: IconName; count: number | null }[]>(() => [
+  { id: "found", label: "Found", icon: "pin", count: reports.value.found.length },
+  { id: "lost", label: "Lost", icon: "search", count: reports.value.lost.length },
+  { id: "map", label: "Map", icon: "map", count: null },
+  { id: "claimed", label: "Claimed", icon: "check", count: claims.value.length },
+  { id: "yours", label: "Yours", icon: "user", count: yoursCount.value || null },
 ]);
 </script>
 
@@ -33,7 +33,7 @@ const tabs = computed<{ id: Tab; label: string; count: number }[]>(() => [
     </p>
     <p v-if="!loaded" class="muted loading">Loading…</p>
     <template v-else>
-      <div class="tabs" role="tablist">
+      <nav class="tabs" role="tablist" aria-label="Sections">
         <button
           v-for="entry in tabs"
           :key="entry.id"
@@ -44,14 +44,19 @@ const tabs = computed<{ id: Tab; label: string; count: number }[]>(() => [
           :aria-selected="tab === entry.id"
           @click="tab = entry.id"
         >
-          {{ entry.label }} <span class="count">{{ entry.count }}</span>
+          <Icon :name="entry.icon" :size="18" />
+          <span class="label">{{ entry.label }}</span>
+          <span v-if="entry.count !== null" class="count">{{ entry.count }}</span>
         </button>
-      </div>
+      </nav>
       <ReportList v-if="tab === 'found'" :cards="reports.found" kind="found" />
       <ReportList v-else-if="tab === 'lost'" :cards="reports.lost" kind="lost" />
-      <BuildingBoard v-else />
+      <BuildingBoard v-else-if="tab === 'map'" />
+      <ClaimedList v-else-if="tab === 'claimed'" />
+      <YoursPanel v-else />
     </template>
     <AddMenu />
+    <p v-if="toast" class="toast" role="status"><Icon name="check" :size="18" />{{ toast }}</p>
   </section>
 </template>
 
@@ -59,11 +64,11 @@ const tabs = computed<{ id: Tab; label: string; count: number }[]>(() => [
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-6);
   max-width: 1168px;
   margin: 0 auto;
   /* Room below the last card for the floating add button. */
-  padding-bottom: 88px;
+  padding-bottom: 104px;
 }
 .banner {
   display: flex;
@@ -88,22 +93,26 @@ const tabs = computed<{ id: Tab; label: string; count: number }[]>(() => [
   gap: var(--space-2);
 }
 .tab {
-  padding: 8px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--tap);
+  padding: 0 18px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-full);
   background: var(--color-surface);
   font-weight: 700;
 }
 .tab .count {
-  margin-left: 4px;
   color: var(--color-text-muted);
   font-weight: 600;
 }
 .tab.on {
-  color: #ffffff;
+  color: var(--color-on-accent);
   border-color: transparent;
   background: var(--color-accent);
 }
+/* Found and Lost keep their colour when chosen, so the tab says which list you are in. */
 .tab.on.found {
   background: var(--color-found);
 }
@@ -113,5 +122,58 @@ const tabs = computed<{ id: Tab; label: string; count: number }[]>(() => [
 .tab.on .count {
   color: inherit;
   opacity: 0.85;
+}
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: min(520px, calc(100vw - 120px));
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  background: var(--color-text);
+  color: var(--color-page);
+  box-shadow: var(--shadow-popover);
+  transform: translateX(-50%);
+}
+
+/* On a phone the tabs sit at the bottom of the screen, where a thumb reaches them (Fitts's law). */
+@media (max-width: 640px) {
+  .page {
+    padding-bottom: 168px;
+  }
+  .tabs {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    flex-wrap: nowrap;
+    gap: 0;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+  .tab {
+    flex: 1 1 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-height: 56px;
+    padding: 4px 0;
+    border: 0;
+    border-radius: var(--radius-md);
+    font-size: var(--text-xs);
+  }
+  .tab .count {
+    display: none;
+  }
+  .toast {
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    max-width: calc(100vw - 32px);
+  }
 }
 </style>

@@ -2,13 +2,13 @@
 import { computed, ref } from "vue";
 import Dialog from "../reusable/ui/Dialog.vue";
 import Icon from "../reusable/ui/Icon.vue";
-import { CATEGORIES } from "./format.ts";
+import { CATEGORIES, categoryLabel } from "./format.ts";
 import { shrinkPhoto } from "./photo.ts";
 import { type FileInput, useLostFound } from "./useLostFound.ts";
 
 const props = defineProps<{ kind: "found" | "lost" }>();
 const emit = defineEmits<{ close: [] }>();
-const { places, working, tab, highlight, fileReport } = useLostFound();
+const { places, working, tab, highlight, fileReport, showToast } = useLostFound();
 
 const MAX_DESCRIPTION = 500;
 const MAX_SPOT = 100;
@@ -73,12 +73,18 @@ async function submit() {
   }
   tab.value = props.kind;
   highlight.value = result.report;
+  const what = categoryLabel(category.value).toLowerCase();
+  if (lost.value) showToast(`Posted. You'll be told when someone finds a ${what} in one of your buildings.`);
+  else {
+    const name = places.value.find((place) => place.place === building.value)?.name ?? "that building";
+    showToast(`Posted. Anyone who lost a ${what} in ${name} will be told.`);
+  }
   emit("close");
 }
 </script>
 
 <template>
-  <Dialog :title="lost ? 'Add Lost Item' : 'Add Found Item'" @close="emit('close')">
+  <Dialog :title="lost ? 'Report something you lost' : 'Report something you found'" :subtitle="lost ? 'Owners of matching found items are told, and so are you.' : 'Leave the item where it is. Its owner will come to it.'" @close="emit('close')">
     <form class="form" novalidate @submit.prevent="submit">
       <label class="field">
         Category
@@ -123,14 +129,14 @@ async function submit() {
           <button type="button" class="button outline" @click="photo = null">Remove</button>
         </div>
         <label v-else class="button outline pick">
-          <Icon name="camera" :size="16" />Choose a photo
-          <input class="file" type="file" accept="image/*" @change="choosePhoto" />
+          <Icon name="camera" :size="16" />Take or choose a photo
+          <input class="file" type="file" accept="image/*" capture="environment" @change="choosePhoto" />
         </label>
       </div>
 
       <p v-if="refusal" class="refusal" role="alert">{{ refusal }}</p>
       <button type="submit" class="button primary large" :disabled="working">
-        {{ working ? "Sending…" : lost ? "Add lost item" : "Add found item" }}
+        {{ working ? "Posting…" : lost ? "Post lost item" : "Post found item" }}
       </button>
     </form>
   </Dialog>
@@ -197,7 +203,7 @@ async function submit() {
   cursor: pointer;
 }
 .pick:focus-within {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-text);
   outline-offset: 2px;
 }
 </style>

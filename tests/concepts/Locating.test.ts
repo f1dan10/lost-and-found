@@ -165,6 +165,21 @@ describe("Locating", () => {
     expect(await locating._getItemsAt({ place: c! })).toEqual([]);
   });
 
+  test("repositioning moves a place and keeps its name and items; bad coordinates or an unknown place are refused", async () => {
+    const { locating } = await setup();
+    const [b2] = await addPlaces(locating, ["Building 2"]);
+    await locating.locate({ item: "bottle", places: [b2!] });
+
+    expect(await locating.reposition({ place: b2!, latitude: 42.3588, longitude: -71.09023 })).toEqual({ place: b2 });
+    expect(await locating._getPlaces()).toEqual([{ place: b2, name: "Building 2", latitude: 42.3588, longitude: -71.09023 }]);
+    expect(await locating._getItemsAt({ place: b2! })).toEqual([{ item: "bottle" }]);
+
+    await expect(locating.reposition({ place: b2!, latitude: 91, longitude: 0 })).rejects.toThrow(InvalidPlace);
+    await expect(locating.reposition({ place: b2!, latitude: 0, longitude: Number.NaN })).rejects.toThrow(InvalidPlace);
+    await expect(locating.reposition({ place: "nowhere" as Place, latitude: 42, longitude: -71 })).rejects.toThrow("That place doesn't exist.");
+    expect(await locating._getPlaces()).toMatchObject([{ latitude: 42.3588, longitude: -71.09023 }]);
+  });
+
   test("neighbors share at least one place, each comes once however many places overlap, and an item is not its own", async () => {
     const { locating } = await setup();
     const [a, b, c] = await addPlaces(locating, ["A", "B", "C"]);
