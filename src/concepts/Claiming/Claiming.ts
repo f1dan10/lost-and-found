@@ -2,6 +2,8 @@ import { type Collection, type Db, MongoServerError } from "mongodb";
 
 export class AlreadyClaimed extends Error {}
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 interface ClaimDocument<Claimant, Item> {
   _id: Item;
   claimant: Claimant;
@@ -35,6 +37,19 @@ export class ClaimingConcept<Claimant extends string, Item extends string> {
   async _getClaimant({ item }: { item: Item }) {
     const found = await this.claims.findOne({ _id: item });
     return found === null ? [] : [{ claimant: found.claimant, claimedAt: found.claimedAt }];
+  }
+
+  /** Old claims are only left out, never deleted, because a claim is the record of who took the item. */
+  async _recent({ days }: { days: number }) {
+    if (typeof days !== "number" || !(days > 0)) return [];
+    const since = new Date(this.clock().getTime() - days * DAY_MS);
+    const found = await this.claims.find({ claimedAt: { $gte: since } }).sort({ claimedAt: -1, _id: -1 }).toArray();
+    return found.map(({ _id, claimant, claimedAt }) => ({ item: _id, claimant, claimedAt }));
+  }
+
+  async _byClaimant({ claimant }: { claimant: Claimant }) {
+    const found = await this.claims.find({ claimant }).sort({ claimedAt: -1, _id: -1 }).toArray();
+    return found.map(({ _id, claimedAt }) => ({ item: _id, claimedAt }));
   }
 }
 

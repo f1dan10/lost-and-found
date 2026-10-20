@@ -41,6 +41,8 @@ Defined in [Claiming](../design/concepts/Claiming.md), line 1.
 #### Queries
 
 - `_getClaimant(item: Item) : optional (claimant: Claimant, claimedAt: DateTime)`
+- `_recent(days: Number) : many (item: Item, claimant: Claimant, claimedAt: DateTime)`
+- `_byClaimant(claimant: Claimant) : many (item: Item, claimedAt: DateTime)`
 
 #### Instances
 
@@ -228,6 +230,32 @@ Former "every place" — inputs (); bindings (place, name, latitude, longitude);
       place
 ```
 
+### the claims of (user)
+
+Authored path: `claims.listing.myClaims`.
+- Covered by [Claims](../design/compositions/claims.md), line 21.
+
+```former
+Former "the claims of (user)" — inputs (user); bindings (report, claimedAt, category, description, reporter, foundBy, place, name, spot, photo); promises exactly one record — forms:
+  each Claiming._byClaimant (claimant: user) has (claimedAt, item: report)
+    where Reporting._getReport (report) has (category, description, reporter)
+    where Registering._username (user: reporter) has (username: foundBy)
+    where whether Locating._getSpot (item: report) has (spot)
+    where whether Reporting._getPhoto (report) has (photo)
+    form a record of
+      category
+      claimedAt
+      description
+      foundBy
+      photo
+      places: each Locating._getPlacesOf (item: report) has (name, place)
+        form a record of
+          name
+          place
+      report
+      spot
+```
+
 ### the open reports of (kind)
 
 Authored path: `reports.listing.reportCards`.
@@ -255,19 +283,46 @@ Former "the open reports of (kind)" — inputs (kind); bindings (report, categor
       username
 ```
 
+### the recently claimed items
+
+Authored path: `claims.listing.claimedCards`.
+- Covered by [Claims](../design/compositions/claims.md), line 15.
+
+```former
+Former "the recently claimed items" — inputs (); bindings (report, claimedAt, category, description, place, name, spot, photo); promises exactly one record — forms:
+  each Claiming._recent (days: 30) has (claimedAt, item: report)
+    where Reporting._getReport (report) has (category, description)
+    where whether Locating._getSpot (item: report) has (spot)
+    where whether Reporting._getPhoto (report) has (photo)
+    form a record of
+      category
+      claimedAt
+      description
+      photo
+      places: each Locating._getPlacesOf (item: report) has (name, place)
+        form a record of
+          name
+          place
+      report
+      spot
+```
+
 ### the reports of (user)
 
 Authored path: `owning.listing.myReports`.
 - Covered by [Owning](../design/compositions/owning.md), line 18.
 
 ```former
-Former "the reports of (user)" — inputs (user); bindings (report, kind, category, description, filedAt, status, place, name, spot, photo); promises exactly one record — forms:
+Former "the reports of (user)" — inputs (user); bindings (report, kind, category, description, filedAt, status, place, name, spot, photo, claimant, claimedBy); promises exactly one record — forms:
   each Reporting._getByReporter (reporter: user) has (report)
     where Reporting._getReport (report) has (category, description, filedAt, kind, status)
     where whether Locating._getSpot (item: report) has (spot)
     where whether Reporting._getPhoto (report) has (photo)
+    where whether Claiming._getClaimant (item: report) has (claimant)
+    where whether Registering._username (user: claimant) has (username: claimedBy)
     form a record of
       category
+      claimedBy
       description
       filedAt
       kind
@@ -430,6 +485,58 @@ Authored path: `claims.claiming.ResolveOnClaim`.
 when Claiming.claim (item: report)
 then
   Reporting.resolve (report)
+```
+
+### claims.listing.ListClaims
+
+Authored path: `claims.listing.ListClaims`.
+- Covered by [Claims](../design/compositions/claims.md), line 15.
+- Covered by [Claims](../design/compositions/claims.md), line 18.
+
+```reaction
+when RequestBoundary.request (path: "/claims/list", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### claims.listing.ListClaims#2
+
+Authored path: `claims.listing.ListClaims`.
+- Covered by [Claims](../design/compositions/claims.md), line 15.
+- Covered by [Claims](../design/compositions/claims.md), line 18.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by claims.listing.ListClaims
+where
+  earlier, RequestBoundary.request (path: "/claims/list", requestId, session)
+then
+  RequestBoundary.respond (claims: former "the recently claimed items", requestId)
+```
+
+### claims.listing.ListMyClaims
+
+Authored path: `claims.listing.ListMyClaims`.
+- Covered by [Claims](../design/compositions/claims.md), line 21.
+- Covered by [Claims](../design/compositions/claims.md), line 24.
+
+```reaction
+when RequestBoundary.request (path: "/claims/mine", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### claims.listing.ListMyClaims#2
+
+Authored path: `claims.listing.ListMyClaims`.
+- Covered by [Claims](../design/compositions/claims.md), line 21.
+- Covered by [Claims](../design/compositions/claims.md), line 24.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by claims.listing.ListMyClaims
+where
+  earlier, RequestBoundary.request (path: "/claims/mine", requestId, session)
+then
+  RequestBoundary.respond (claims: former "the claims of (user)" with (user), requestId)
 ```
 
 ### matching.notifying.NotifyOwnerOfMatch
@@ -976,6 +1083,8 @@ not listed here have no explicit input contract.
 - `/auth/logout` — requires `session`
 - `/auth/me` — requires `session`
 - `/auth/register` — requires `password`, `username`
+- `/claims/list` — requires `session`
+- `/claims/mine` — requires `session`
 - `/notifications/list` — requires `session`
 - `/notifications/read` — requires `notification`, `session`
 - `/places/list` — requires `session`

@@ -47,6 +47,43 @@ describe("Claiming", () => {
     expect(await database.collection("claiming.claims").countDocuments()).toBe(1);
   });
 
+  test("the recent claims are the last N days', newest first; older claims are left out but still recorded", async () => {
+    let now = NOON;
+    const claiming = new ClaimingConcept<string, string>(await testDatabase(), "Claiming", () => now);
+    const day = 24 * 60 * 60 * 1000;
+    await claiming.claim({ claimant: "tamar", item: "bottle" });
+    now = new Date(NOON.getTime() + 10 * day);
+    await claiming.claim({ claimant: "sam", item: "keys" });
+    now = new Date(NOON.getTime() + 25 * day);
+
+    expect(await claiming._recent({ days: 30 })).toEqual([
+      { item: "keys", claimant: "sam", claimedAt: new Date(NOON.getTime() + 10 * day) },
+      { item: "bottle", claimant: "tamar", claimedAt: NOON },
+    ]);
+    expect(await claiming._recent({ days: 7 })).toEqual([]);
+
+    now = new Date(NOON.getTime() + 31 * day);
+    expect((await claiming._recent({ days: 30 })).map(({ item }) => item)).toEqual(["keys"]);
+    expect(await claiming._getClaimant({ item: "bottle" })).toEqual([{ claimant: "tamar", claimedAt: NOON }]);
+
+    for (const days of [0, -1, Number.NaN]) expect(await claiming._recent({ days })).toEqual([]);
+  });
+
+  test("a claimant's claims come newest first, however old, and never another person's", async () => {
+    let now = NOON;
+    const claiming = new ClaimingConcept<string, string>(await testDatabase(), "Claiming", () => now);
+    await claiming.claim({ claimant: "tamar", item: "bottle" });
+    now = new Date(NOON.getTime() + 60_000);
+    await claiming.claim({ claimant: "tamar", item: "keys" });
+    await claiming.claim({ claimant: "sam", item: "bag" });
+
+    expect(await claiming._byClaimant({ claimant: "tamar" })).toEqual([
+      { item: "keys", claimedAt: now },
+      { item: "bottle", claimedAt: NOON },
+    ]);
+    expect(await claiming._byClaimant({ claimant: "nobody" })).toEqual([]);
+  });
+
   test("an unclaimed or unknown item has no claimant", async () => {
     const { claiming } = await setup();
     await claiming.claim({ claimant: "tamar", item: "bottle" });

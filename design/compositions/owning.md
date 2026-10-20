@@ -15,7 +15,7 @@ owning.closing.ResolveReport at /reports/resolve
 
 ## Listing
 
-[The reports of a user](former:owning.listing.myReports) are every report `Reporting._getByReporter` returns for them, newest first, open or closed. Each comes with its kind, category, description, filing time, and status from Reporting, and its places and spot from Locating. A report has a spot and a photo only when its reporter gave them, and the former gives `null` for the ones it lacks. The [list endpoint](reaction:owning.listing.ListMyReports) responds with them as `reports`, and only ever for the signed-in person.
+[The reports of a user](former:owning.listing.myReports) are every report `Reporting._getByReporter` returns for them, newest first, open or closed. Each comes with its kind, category, description, filing time, and status from Reporting, and its places and spot from Locating. A found report that someone claimed also comes with `claimedBy`, the claimant's username from Claiming and Registering, so the finder knows who took it; it is `null` while the report is unclaimed. A report has a spot and a photo only when its reporter gave them, and the former gives `null` for the ones it lacks. The [list endpoint](reaction:owning.listing.ListMyReports) responds with them as `reports`, and only ever for the signed-in person.
 
 ```endpoints
 owning.listing.ListMyReports at /reports/mine

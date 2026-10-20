@@ -4,7 +4,7 @@ import { concepts } from "../concepts.ts";
 import { owns } from "./access.ts";
 import { textInput } from "./reusable/inputs.ts";
 
-const { Sessioning, Reporting, Locating } = concepts;
+const { Sessioning, Reporting, Locating, Claiming, Registering } = concepts;
 
 // Closing
 
@@ -51,16 +51,19 @@ const ResolveReport = endpoint(
 
 /**
  * Every report the user filed, newest first, open or closed, with its kind and status so the screen can offer
- * the right actions. The spot and the photo are null when a report has none.
+ * the right actions. The spot and the photo are null when a report has none. `claimedBy` is the username of whoever
+ * claimed a found report, shown only here to the person who found it, and null while it is unclaimed.
  */
 export const myReports = former(
   "the reports of (user)",
-  ({ user }, { report, kind, category, description, filedAt, status, place, name, spot, photo }) =>
+  ({ user }, { report, kind, category, description, filedAt, status, place, name, spot, photo, claimant, claimedBy }) =>
     each(Reporting._getByReporter({ reporter: user }).is({ report }))
       .where(
         Reporting._getReport({ report }).is({ kind, category, description, filedAt, status }),
         whether(Locating._getSpot({ item: report }).is({ spot })),
         whether(Reporting._getPhoto({ report }).is({ photo })),
+        whether(Claiming._getClaimant({ item: report }).is({ claimant })),
+        whether(Registering._username({ user: claimant }).is({ username: claimedBy })),
       )
       .form({
         report,
@@ -69,6 +72,7 @@ export const myReports = former(
         description,
         filedAt,
         status,
+        claimedBy,
         spot,
         photo,
         places: each(Locating._getPlacesOf({ item: report }).is({ place, name })).form({ place, name }),
