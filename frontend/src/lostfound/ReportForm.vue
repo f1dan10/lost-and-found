@@ -13,7 +13,7 @@ import { type FileInput, useLostFound } from "./useLostFound.ts";
  */
 const props = defineProps<{ kind: "found" | "lost" }>();
 const emit = defineEmits<{ close: [] }>();
-const { places, working, tab, highlight, fileReport, showToast } = useLostFound();
+const { places, working, show, fileReport, showToast } = useLostFound();
 
 const MAX_DESCRIPTION = 500;
 const MAX_SPOT = 100;
@@ -74,8 +74,7 @@ async function submit() {
     refusal.value = result.error;
     return;
   }
-  tab.value = props.kind;
-  highlight.value = result.report;
+  show(props.kind, result.report);
   const what = categoryLabel(category.value).toLowerCase();
   if (lost.value) showToast(`Posted. You'll be told when someone finds a ${what} in one of your buildings.`);
   else {

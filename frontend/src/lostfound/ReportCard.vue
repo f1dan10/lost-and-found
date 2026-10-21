@@ -14,16 +14,17 @@ import { type CardLike, useLostFound } from "./useLostFound.ts";
 const props = defineProps<{ card: CardLike; kind: "found" | "lost"; mine?: boolean }>();
 const emit = defineEmits<{ claim: [card: CardLike] }>();
 const { me } = useSession();
-const { highlight } = useLostFound();
+const { selected } = useLostFound();
+const highlighted = computed(() => selected.value?.report === props.card.report);
 const root = ref<HTMLElement | null>(null);
 const viewing = ref(false);
 
 /** Scrolls the card into view when it is the one being pointed at, such as from a notice. */
 function showIfHighlighted() {
-  if (highlight.value === props.card.report) void nextTick(() => root.value?.scrollIntoView({ block: "center", behavior: "smooth" }));
+  if (highlighted.value) void nextTick(() => root.value?.scrollIntoView({ block: "center", behavior: "smooth" }));
 }
 onMounted(showIfHighlighted);
-watch(highlight, showIfHighlighted);
+watch(highlighted, showIfHighlighted);
 
 const isMine = computed(() => props.mine === true || (props.card.username !== undefined && props.card.username === me.value?.username));
 const where = computed(() => props.card.places.map((place) => place.name).join(" · "));
@@ -31,7 +32,7 @@ const label = computed(() => `${categoryLabel(props.card.category)}: ${props.car
 </script>
 
 <template>
-  <article ref="root" class="card report" :class="[kind, { highlighted: highlight === card.report }]">
+  <article ref="root" class="card report" :class="[kind, { highlighted }]">
     <button type="button" class="photo-button" :aria-label="`See details: ${label}`" @click="viewing = true">
       <img v-if="card.photo" class="photo" :src="card.photo" :alt="label" />
       <span v-else class="photo none" :class="kind"><Icon :name="categoryIcon(card.category)" :size="44" /></span>

@@ -3,33 +3,24 @@ import { computed } from "vue";
 import Icon from "../reusable/ui/Icon.vue";
 import Menu from "../reusable/ui/Menu.vue";
 import { categoryLabel, timeAgo } from "./format.ts";
-import { type Notification, type Tab, useLostFound } from "./useLostFound.ts";
+import { useSession } from "../reusable/session.ts";
+import { sectionOf } from "./sections.ts";
+import { type Notification, useLostFound } from "./useLostFound.ts";
 
-const { reports, claims, myClaims, mine, notifications, tab, highlight, markRead, working } = useLostFound();
+const { lists, notifications, show, markRead, working } = useLostFound();
+const { me } = useSession();
 
 const count = computed(() => notifications.value.length);
 const badge = computed(() => (count.value > 9 ? "9+" : String(count.value)));
 
 /**
- * Opens the notice: marks it read, then shows the tab where the report it is about lives now and points at its card.
- * A match opens the Found list; a claim or a thank-you on my report, or an item I claimed, opens Yours; a report
- * someone else claimed opens Claimed. A notice about a report that is in none of them only shows its text.
+ * Opens the notice: marks it read, then shows the section where the report it is about lives now and chooses it.
+ * A match opens Found; a claim, a thank-you or a pickup of my report opens History; an item I claimed opens Waiting on
+ * you. A notice about a report that is in no section only shows its text.
  */
 async function open(notice: Notification) {
-  const is = (row: { report: string }) => row.report === notice.subject;
-  const where: Tab | null = reports.value.found.some(is)
-    ? "found"
-    : reports.value.lost.some(is)
-      ? "lost"
-      : myClaims.value.some(is) || mine.value.some(is)
-        ? "yours"
-        : claims.value.some(is)
-          ? "claimed"
-          : null;
-  if (where) {
-    tab.value = where;
-    highlight.value = notice.subject;
-  }
+  const where = sectionOf(notice.subject, lists.value, me.value?.username ?? null);
+  if (where) show(where, notice.subject);
   await markRead(notice.notification);
 }
 </script>

@@ -6,9 +6,16 @@ import BuildingBoard from "./lostfound/BuildingBoard.vue";
 import ClaimedList from "./lostfound/ClaimedList.vue";
 import ReportList from "./lostfound/ReportList.vue";
 import YoursPanel from "./lostfound/YoursPanel.vue";
-import { type Tab, useLostFound } from "./lostfound/useLostFound.ts";
+import { SECTIONS } from "./lostfound/sections.ts";
+import { type Section, useLostFound } from "./lostfound/useLostFound.ts";
 
-const { reports, claims, myClaims, mine, tab, loaded, error, toast, startPolling, reset } = useLostFound();
+/** Until the sidebar arrives, the tabs stand for sections: the four Yours sections share the Yours tab. */
+type Tab = "found" | "lost" | "map" | "returned" | "yours";
+
+const { reports, claims, myClaims, mine, section, show, loaded, error, toast, startPolling, reset } = useLostFound();
+const yours = (id: Section) => SECTIONS.find((entry) => entry.id === id)?.group === "yours";
+const tab = computed<Tab>(() => (yours(section.value) ? "yours" : (section.value as Tab)));
+const choose = (id: Tab) => show(id === "yours" ? "waiting" : id);
 
 onMounted(startPolling);
 // Leaving the page means signing out or a session that ended: stop polling and forget the lists.
@@ -20,7 +27,7 @@ const tabs = computed<{ id: Tab; label: string; icon: IconName; count: number | 
   { id: "found", label: "Found", icon: "pin", count: reports.value.found.length },
   { id: "lost", label: "Lost", icon: "search", count: reports.value.lost.length },
   { id: "map", label: "Map", icon: "map", count: null },
-  { id: "claimed", label: "Claimed", icon: "check", count: claims.value.length },
+  { id: "returned", label: "Returned", icon: "check", count: claims.value.length },
   { id: "yours", label: "Yours", icon: "user", count: yoursCount.value || null },
 ]);
 </script>
@@ -43,7 +50,7 @@ const tabs = computed<{ id: Tab; label: string; icon: IconName; count: number | 
           :class="[entry.id, { on: tab === entry.id }]"
           :aria-selected="tab === entry.id"
           :aria-label="entry.count === null ? entry.label : `${entry.label}, ${entry.count}`"
-          @click="tab = entry.id"
+          @click="choose(entry.id)"
         >
           <Icon :name="entry.icon" :size="20" />
           <span class="label">{{ entry.label }}</span>
@@ -53,7 +60,7 @@ const tabs = computed<{ id: Tab; label: string; icon: IconName; count: number | 
       <ReportList v-if="tab === 'found'" :cards="reports.found" kind="found" />
       <ReportList v-else-if="tab === 'lost'" :cards="reports.lost" kind="lost" />
       <BuildingBoard v-else-if="tab === 'map'" />
-      <ClaimedList v-else-if="tab === 'claimed'" />
+      <ClaimedList v-else-if="tab === 'returned'" />
       <YoursPanel v-else />
     </template>
     <AddMenu />

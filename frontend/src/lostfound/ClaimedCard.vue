@@ -10,22 +10,23 @@ import { type ClaimedCard, type MyClaim, useLostFound } from "./useLostFound.ts"
  * where to pick it up, who found it, and lets me thank them once.
  */
 const props = defineProps<{ claim: ClaimedCard; mine?: MyClaim }>();
-const { highlight } = useLostFound();
+const { selected } = useLostFound();
+const highlighted = computed(() => selected.value?.report === props.claim.report);
 const root = ref<HTMLElement | null>(null);
 const thanking = ref(false);
 
 function showIfHighlighted() {
-  if (highlight.value === props.claim.report) void nextTick(() => root.value?.scrollIntoView({ block: "center", behavior: "smooth" }));
+  if (highlighted.value) void nextTick(() => root.value?.scrollIntoView({ block: "center", behavior: "smooth" }));
 }
 onMounted(showIfHighlighted);
-watch(highlight, showIfHighlighted);
+watch(highlighted, showIfHighlighted);
 
 const where = computed(() => props.claim.places.map((place) => place.name).join(" · "));
 const label = computed(() => `${categoryLabel(props.claim.category)}: ${props.claim.description}`);
 </script>
 
 <template>
-  <article ref="root" class="card claimed-card" :class="{ highlighted: highlight === claim.report }">
+  <article ref="root" class="card claimed-card" :class="{ highlighted }">
     <img v-if="claim.photo" class="photo" :src="claim.photo" :alt="label" />
     <span v-else class="photo none"><Icon :name="categoryIcon(claim.category)" :size="44" /></span>
 

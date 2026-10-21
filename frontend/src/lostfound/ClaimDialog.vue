@@ -13,7 +13,7 @@ import { type CardLike, useLostFound } from "./useLostFound.ts";
  */
 const props = defineProps<{ card: CardLike }>();
 const emit = defineEmits<{ close: [] }>();
-const { claim, resolve, working, reports, tab, highlight } = useLostFound();
+const { claim, resolve, working, reports, show } = useLostFound();
 const { me } = useSession();
 const claimed = ref(false);
 const closed = ref<string[]>([]);
@@ -36,8 +36,7 @@ async function closeLost(report: CardLike["report"]) {
 }
 
 function seeMyClaims() {
-  tab.value = "yours";
-  highlight.value = props.card.report;
+  show("claims", props.card.report);
   emit("close");
 }
 </script>

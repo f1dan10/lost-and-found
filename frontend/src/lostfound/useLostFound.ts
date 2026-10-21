@@ -1,28 +1,24 @@
-import { ref } from "vue";
-import type { LostFoundWireHttp } from "../../../generated/wire.ts";
+import { computed, ref } from "vue";
 import { api } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
+import { rowsFor, type Section } from "./sections.ts";
+import type {
+  ClaimedCard,
+  FileInput,
+  Lists,
+  MyClaim,
+  MyReport,
+  Notification,
+  NotificationId,
+  Path,
+  Place,
+  ReportId,
+  Reports,
+} from "./types.ts";
 
-type Wire = LostFoundWireHttp;
-type Path = keyof Wire;
-export type Reports = Pick<Wire["/reports/list"]["output"], "found" | "lost">;
-/** A report card. A card has no kind: the kind is the list it sits in. */
-export type Card = Reports["found"][number];
-export type Place = Wire["/places/list"]["output"]["places"][number];
-export type Notification = Wire["/notifications/list"]["output"]["notifications"][number];
-export type ReportId = Card["report"];
-export type NotificationId = Notification["notification"];
-export type FileInput = Wire["/reports/file"]["input"];
-/** An item claimed in the last 30 days, in the Claimed tab. It never says who claimed it. */
-export type ClaimedCard = Wire["/claims/list"]["output"]["claims"][number];
-/** An item I claimed, with who found it and whether I thanked them. */
-export type MyClaim = Wire["/claims/mine"]["output"]["claims"][number];
-/** A report I filed, open or closed, with its status, who claimed it, and their thanks. */
-export type MyReport = Wire["/reports/mine"]["output"]["reports"][number];
-/** What a report card needs: an open card, or one of my own reports, which has no username. */
-export type CardLike = Omit<Card, "reporter" | "username"> & { username?: string };
-export type Tab = "found" | "lost" | "map" | "claimed" | "yours";
+export type { Card, CardLike, ClaimedCard, FileInput, MyClaim, MyReport, Notification, NotificationId, Place, ReportId, Reports } from "./types.ts";
+export type { Section } from "./sections.ts";
 
 const POLL_MS = 8_000;
 const FOLLOW_UP_MS = 400;
@@ -36,9 +32,12 @@ const myClaims = ref<MyClaim[]>([]);
 const mine = ref<MyReport[]>([]);
 /** A short confirmation at the bottom of the screen, such as "Posted.", which goes away by itself. */
 const toast = ref<string | null>(null);
-const tab = ref<Tab>("found");
-/** The report to point out on the screen, such as the one a notice is about. */
-const highlight = ref<ReportId | null>(null);
+/** The section of the app on screen, such as Found or Waiting on you. */
+const section = ref<Section>("found");
+/** The item chosen in a section, which the detail panel shows; null when nothing is chosen. */
+const selected = ref<{ section: Section; report: ReportId } | null>(null);
+/** What is typed in the search box. */
+const query = ref("");
 /** False until the first refresh finishes, so the page can say "Loading…" instead of "Nothing found yet". */
 const loaded = ref(false);
 const error = ref<string | null>(null);
@@ -86,7 +85,34 @@ async function refresh() {
   else myClaims.value = myClaimList.claims;
   if ("error" in myReportList) error.value = myReportList.error;
   else mine.value = myReportList.reports;
+  keepSelection();
   loaded.value = true;
+}
+
+/** Everything loaded, as one value the sections are computed from. */
+const lists = computed<Lists>(() => ({
+  reports: reports.value,
+  claims: claims.value,
+  myClaims: myClaims.value,
+  mine: mine.value,
+  notifications: notifications.value,
+}));
+
+/** Shows a section and chooses an item in it, such as the report a notice is about. */
+function show(where: Section, report: ReportId | null = null) {
+  section.value = where;
+  selected.value = report === null ? null : { section: where, report };
+}
+
+/**
+ * Forgets the chosen item once it is no longer in its section, such as a found item someone else just claimed,
+ * so the detail panel never shows something the list doesn't.
+ */
+function keepSelection() {
+  const chosen = selected.value;
+  if (chosen === null) return;
+  const me = useSession().me.value?.username ?? null;
+  if (!rowsFor(chosen.section, lists.value, me).some((row) => row.report === chosen.report)) selected.value = null;
 }
 
 /** Shows a confirmation for a few seconds. */
@@ -218,8 +244,9 @@ function reset() {
   myClaims.value = [];
   mine.value = [];
   toast.value = null;
-  tab.value = "found";
-  highlight.value = null;
+  section.value = "found";
+  selected.value = null;
+  query.value = "";
   loaded.value = false;
   error.value = null;
   working.value = false;
@@ -238,8 +265,11 @@ export function useLostFound() {
     myClaims,
     mine,
     toast,
-    tab,
-    highlight,
+    lists,
+    section,
+    selected,
+    query,
+    show,
     loaded,
     error,
     working,
