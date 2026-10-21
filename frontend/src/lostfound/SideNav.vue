@@ -53,7 +53,7 @@ const groups = computed(() => [
         <span class="marker"><Icon :name="ICONS[entry.id]" :size="18" /></span>
         <span class="label">{{ entry.label }}</span>
         <span v-if="counts[entry.id] !== null" class="count">
-          {{ counts[entry.id] }}<span class="sr-only">{{ query ? " matching" : " items" }}</span>
+          {{ counts[entry.id] }}<span v-if="query" class="sr-only"> matching</span>
         </span>
       </button>
     </div>

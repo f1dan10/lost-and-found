@@ -38,6 +38,8 @@ const section = ref<Section>("found");
 const selected = ref<{ section: Section; report: ReportId } | null>(null);
 /** What is typed in the search box. */
 const query = ref("");
+/** The item just claimed, so its claim view can say "It's yours" once and offer to close a matching lost report. */
+const justClaimed = ref<ReportId | null>(null);
 /** The report form that is open, if any: what the person is reporting. */
 const reporting = ref<"found" | "lost" | null>(null);
 /** False until the first refresh finishes, so the page can say "Loading…" instead of "Nothing found yet". */
@@ -173,6 +175,11 @@ async function fileReport(input: FileInput): Promise<{ report: ReportId } | { er
 /** Claims a found report. A refusal reloads the lists, which no longer show a report that was taken. */
 async function claim(report: ReportId): Promise<boolean> {
   const accepted = await change("/reports/claim", api.reports.claim({ report }));
+  if (accepted) {
+    // The item leaves Found once it is claimed, so the choice follows it to Your claims.
+    justClaimed.value = report;
+    show("claims", report);
+  }
   refreshAgain();
   return accepted;
 }
@@ -199,6 +206,17 @@ async function resolve(report: ReportId): Promise<boolean> {
 async function renew(report: ReportId): Promise<boolean> {
   const accepted = await change("/reports/renew", api.reports.renew({ report }));
   if (accepted) showToast("Renewed. It stays up for two more weeks.");
+  return accepted;
+}
+
+/** Marks an item I claimed as picked up; it moves from Waiting on you to History, and the finder is told. */
+async function collect(report: ReportId, finder: string): Promise<boolean> {
+  const accepted = await change("/claims/collect", api.claims.collect({ report }));
+  if (accepted) {
+    showToast(`Marked as picked up. ${finder} will be told.`);
+    show("history", report);
+    refreshAgain();
+  }
   return accepted;
 }
 
@@ -250,6 +268,7 @@ function reset() {
   selected.value = null;
   query.value = "";
   reporting.value = null;
+  justClaimed.value = null;
   loaded.value = false;
   error.value = null;
   working.value = false;
@@ -273,6 +292,7 @@ export function useLostFound() {
     selected,
     query,
     reporting,
+    justClaimed,
     show,
     loaded,
     error,
@@ -284,6 +304,7 @@ export function useLostFound() {
     claim,
     markRead,
     withdraw,
+    collect,
     resolve,
     renew,
     thank,

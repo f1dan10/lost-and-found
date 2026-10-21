@@ -1,18 +1,15 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 import BuildingBoard from "./lostfound/BuildingBoard.vue";
 import Brand from "./lostfound/Brand.vue";
-import ClaimDialog from "./lostfound/ClaimDialog.vue";
-import ClaimedCard from "./lostfound/ClaimedCard.vue";
+import DetailPanel from "./lostfound/DetailPanel.vue";
 import ItemList from "./lostfound/ItemList.vue";
 import NotificationBell from "./lostfound/NotificationBell.vue";
 import ReportButton from "./lostfound/ReportButton.vue";
-import ReportCard from "./lostfound/ReportCard.vue";
 import SearchBar from "./lostfound/SearchBar.vue";
 import SideNav from "./lostfound/SideNav.vue";
-import { categoryLabel } from "./lostfound/format.ts";
 import { rowsFor } from "./lostfound/sections.ts";
-import { type CardLike, useLostFound } from "./lostfound/useLostFound.ts";
+import { useLostFound } from "./lostfound/useLostFound.ts";
 import { useSession } from "./reusable/session.ts";
 import Avatar from "./reusable/ui/Avatar.vue";
 import Icon from "./reusable/ui/Icon.vue";
@@ -25,7 +22,6 @@ import Menu from "./reusable/ui/Menu.vue";
  */
 const { lists, section, selected, loaded, error, toast, startPolling, reset } = useLostFound();
 const { me, signOut } = useSession();
-const claiming = ref<CardLike | null>(null);
 
 /** The chosen item's row, looked up in its section, or null when nothing is chosen or it has gone. */
 const row = computed(() => {
@@ -74,17 +70,7 @@ onUnmounted(reset);
       </main>
 
       <aside class="detail-col" aria-label="Chosen item">
-        <!-- Until the detail panel is built, the chosen item is shown as its card, which keeps every action working. -->
-        <div v-if="row" :key="row.key" class="interim">
-          <ReportCard v-if="row.source.type === 'card'" :card="row.source.card" :kind="row.kind" @claim="claiming = $event" />
-          <ReportCard v-else-if="row.source.type === 'mine' && (row.state === 'open' || row.state === 'expired')" :card="row.source.report" :kind="row.kind" mine />
-          <ClaimedCard v-else-if="row.source.type === 'claim'" :claim="row.source.claim" :mine="row.source.claim" />
-          <ClaimedCard v-else-if="row.source.type === 'returned'" :claim="row.source.claim" />
-          <div v-else class="card closed">
-            <p class="item-title">{{ row.description }}</p>
-            <p class="muted">{{ categoryLabel(row.category) }} · {{ row.places.map((place) => place.name).join(", ") }}</p>
-          </div>
-        </div>
+        <DetailPanel v-if="row" :key="row.report" :row="row" />
         <div v-else class="empty-detail">
           <Icon name="list" :size="28" />
           <p>Choose an item to see it here.</p>
@@ -92,7 +78,6 @@ onUnmounted(reset);
       </aside>
     </div>
 
-    <ClaimDialog v-if="claiming" :card="claiming" @close="claiming = null" />
     <p v-if="toast" class="toast" role="status"><Icon name="check" :size="18" />{{ toast }}</p>
   </div>
 </template>
@@ -155,16 +140,6 @@ onUnmounted(reset);
 .detail-col {
   border-left: 1px solid var(--color-border);
   background: var(--color-surface);
-}
-.interim {
-  padding: var(--space-5);
-}
-.closed {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
 }
 .empty-detail {
   display: flex;

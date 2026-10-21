@@ -2,20 +2,24 @@
 import { computed, ref } from "vue";
 import Icon from "../reusable/ui/Icon.vue";
 import CampusMap, { type MapTile } from "./CampusMap.vue";
-import ClaimDialog from "./ClaimDialog.vue";
-import ReportCard from "./ReportCard.vue";
-import { type Card, type CardLike, useLostFound } from "./useLostFound.ts";
+import ItemRow from "./ItemRow.vue";
+import { search } from "./search.ts";
+import { rowsFor } from "./sections.ts";
+import { type Card, useLostFound } from "./useLostFound.ts";
+import { useSession } from "../reusable/session.ts";
 
 /**
  * The Map tab: where found and lost things are, by building. The map is the default view; the list of building tiles
- * shows the same counts and works with a keyboard and a screen reader. Choosing a building lists its reports below.
- * The counts are grouped on the client from the lists already fetched.
+ * shows the same counts and works with a keyboard and a screen reader. Choosing a building lists its reports below,
+ * as rows; choosing a row shows the item in the detail panel. The counts are grouped on the client from the lists
+ * already fetched.
  */
-const { reports, places } = useLostFound();
+const { reports, places, lists, query, selected: chosen, show: choose } = useLostFound();
+const { me } = useSession();
 const view = ref<"map" | "list">("map");
 const show = ref<"both" | "found" | "lost">("both");
+/** The building whose reports are listed below the map. */
 const selected = ref<string | null>(null);
-const claiming = ref<CardLike | null>(null);
 
 const at = (cards: Card[], place: string) => cards.filter((card) => card.places.some((entry) => entry.place === place));
 
@@ -29,17 +33,18 @@ const tiles = computed<MapTile[]>(() =>
     })),
 );
 
-/** The open cards at the selected building, found and lost together, newest first. */
+/** The open reports at the selected building that match the search, found and lost together, newest first. */
 const here = computed(() => {
   const place = selected.value;
   if (place === null) return [];
-  const found = show.value === "lost" ? [] : at(reports.value.found, place).map((card) => ({ card, kind: "found" as const }));
-  const lost = show.value === "found" ? [] : at(reports.value.lost, place).map((card) => ({ card, kind: "lost" as const }));
-  return [...found, ...lost].sort((a, b) => new Date(b.card.filedAt).getTime() - new Date(a.card.filedAt).getTime());
+  return search(rowsFor("map", lists.value, me.value?.username ?? null), query.value)
+    .filter((row) => row.places.some((entry) => entry.place === place))
+    .filter((row) => show.value === "both" || row.kind === show.value)
+    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 });
 const selectedName = computed(() => places.value.find((place) => place.place === selected.value)?.name ?? "");
 
-function choose(place: string) {
+function pick(place: string) {
   selected.value = selected.value === place ? null : place;
 }
 </script>
@@ -67,7 +72,7 @@ function choose(place: string) {
       </div>
     </div>
 
-    <CampusMap v-if="view === 'map'" :tiles="tiles" :selected="selected" @select="choose" />
+    <CampusMap v-if="view === 'map'" :tiles="tiles" :selected="selected" @select="pick" />
     <div v-else class="grid">
       <button
         v-for="tile in tiles"
@@ -76,7 +81,7 @@ function choose(place: string) {
         class="tile"
         :class="{ empty: tile.found + tile.lost === 0, on: selected === tile.place }"
         :aria-pressed="selected === tile.place"
-        @click="choose(tile.place)"
+        @click="pick(tile.place)"
       >
         <span class="name">{{ tile.name }}</span>
         <span class="counts" aria-hidden="true">
@@ -92,12 +97,13 @@ function choose(place: string) {
         <h3>{{ selectedName }}</h3>
         <button type="button" class="button outline" @click="selected = null">Clear</button>
       </div>
-      <div v-if="here.length" class="tiles">
-        <ReportCard v-for="entry in here" :key="entry.card.report" :card="entry.card" :kind="entry.kind" @claim="claiming = $event" />
-      </div>
+      <ul v-if="here.length" class="rows">
+        <li v-for="row in here" :key="row.key">
+          <ItemRow :row="row" :selected="chosen?.report === row.report" :query="query" @choose="choose('map', row.report)" />
+        </li>
+      </ul>
       <p v-else class="muted">Nothing {{ show === "both" ? "has been reported" : show === "found" ? "has been found" : "was lost" }} at {{ selectedName }}.</p>
     </section>
-    <ClaimDialog v-if="claiming" :card="claiming" @close="claiming = null" />
   </section>
 </template>
 
@@ -172,6 +178,14 @@ function choose(place: string) {
   flex-direction: column;
   gap: var(--space-3);
   padding-top: var(--space-2);
+}
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 .here-head {
   display: flex;
