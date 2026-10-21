@@ -1,5 +1,6 @@
 import { categoryLabel } from "./categories.ts";
-import type { Row } from "./sections.ts";
+import { type Row, rowsFor, SECTIONS, type Section } from "./sections.ts";
+import type { Lists } from "./types.ts";
 
 /**
  * The search box: one query, matched against what a person would recognize on a row. That is its description, its
@@ -46,6 +47,17 @@ export function matches(row: Row, query: string): boolean {
 /** The rows that match a query, in the order given. */
 export function search(rows: Row[], query: string): Row[] {
   return rows.filter((row) => matches(row, query));
+}
+
+/**
+ * While searching, the other sections that have matches and how many, in sidebar order, for "Also matching" and for a
+ * section with no matches. The map is left out, because its items are the same as Found and Lost.
+ */
+export function matchesElsewhere(lists: Lists, me: string | null, query: string, here: Section): { id: Section; label: string; count: number }[] {
+  if (terms(query).length === 0) return [];
+  return SECTIONS.filter((entry) => entry.id !== here && entry.id !== "map")
+    .map((entry) => ({ id: entry.id, label: entry.label, count: search(rowsFor(entry.id, lists, me), query).length }))
+    .filter((entry) => entry.count > 0);
 }
 
 /**

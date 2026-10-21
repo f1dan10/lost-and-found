@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { matchesElsewhere } from "../../frontend/src/lostfound/search.ts";
 import { countFor, rowsFor, sectionOf } from "../../frontend/src/lostfound/sections.ts";
 import type { Card, ClaimedCard, Lists, MyClaim, MyReport, Notification } from "../../frontend/src/lostfound/types.ts";
 
@@ -126,5 +127,16 @@ describe("Sections", () => {
     expect(sectionOf("my-found-mug" as never, lists, "tamar", NOW)).toBe("history");
     expect(sectionOf("backpack" as never, lists, "tamar", NOW)).toBe("returned");
     expect(sectionOf("nothing" as never, lists, "tamar", NOW)).toBeNull();
+  });
+
+  test("while searching, matches elsewhere lists the other sections with matches, never the map or the current one", () => {
+    const lists = tamarsLists();
+    // Every sample report is in Building 2, so "building 2" matches in every section that has rows.
+    const elsewhere = matchesElsewhere(lists, "tamar", "building 2", "found");
+    expect(elsewhere.map((entry) => entry.id)).toEqual(["lost", "returned", "waiting", "reports", "claims", "history"]);
+    expect(elsewhere.find((entry) => entry.id === "history")).toEqual({ id: "history", label: "History", count: 4 });
+    expect(matchesElsewhere(lists, "tamar", "jacket", "found")).toEqual([{ id: "lost", label: "Lost", count: 1 }]);
+    expect(matchesElsewhere(lists, "tamar", "", "found")).toEqual([]);
+    expect(matchesElsewhere(lists, "tamar", "umbrella-that-is-nowhere", "found")).toEqual([]);
   });
 });

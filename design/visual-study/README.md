@@ -49,8 +49,14 @@ Every text pair passes AA (4.5:1).
 
 ## Layout choices from the same study
 
-- **Fitts's law.** Every tap target is at least 44 px tall, the claim button spans the card's width, and the add button is 64 px in the bottom-right corner. The actions people take most are the biggest and closest.
+The full layout is described in [layout.md](../layout.md).
+
+- **Fitts's law.**
+  - Every target is at least 44 px tall.
+  - Sidebar entries span the sidebar's full width along the screen's edge.
+  - "Report an item" sits in the header's top-right corner.
+  - The main action ("This is mine", "I picked it up") spans the detail panel's width, always in the same place.
 - **Gestalt grouping.**
-  - **Proximity:** each card has zones in a fixed order: photo, what, where, who and when, then actions.
-  - **Common region:** an owner's actions (renew, close, remove) sit in their own tinted footer.
-  - **Similarity:** found, lost and claimed keep one colour and one icon everywhere.
+  - **Common region:** the three columns are three regions: where you are, what's there, and the one you chose. An owner's actions (renew, close, remove) sit in their own tinted footer.
+  - **Proximity:** every row has the same zones in the same order: picture, title, where and who, then the state tag.
+  - **Similarity:** found, lost and claimed keep one colour and one icon everywhere: rows, tags, sidebar markers and map pins.

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue";
-import BuildingBoard from "./lostfound/BuildingBoard.vue";
 import Brand from "./lostfound/Brand.vue";
 import DetailPanel from "./lostfound/DetailPanel.vue";
 import ItemList from "./lostfound/ItemList.vue";
+import MapPlace from "./lostfound/MapPlace.vue";
 import NotificationBell from "./lostfound/NotificationBell.vue";
 import ReportButton from "./lostfound/ReportButton.vue";
 import SearchBar from "./lostfound/SearchBar.vue";
@@ -64,7 +64,7 @@ onUnmounted(reset);
         </p>
         <p v-if="!loaded" class="muted loading">Loading…</p>
         <template v-else>
-          <BuildingBoard v-if="section === 'map'" />
+          <MapPlace v-if="section === 'map'" />
           <ItemList v-else />
         </template>
       </main>

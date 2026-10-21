@@ -76,12 +76,9 @@ h2 {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
-/* Wide only on a larger screen; on a phone every dialog is a full-width sheet at the bottom. */
-@media (min-width: 601px) {
-  dialog.wide {
-    width: min(720px, calc(100vw - 32px));
-    margin: auto;
-  }
+dialog.wide {
+  width: min(720px, calc(100vw - 32px));
+  margin: auto;
 }
 .close {
   width: 40px;
@@ -112,13 +109,5 @@ dialog.dark .subtitle {
 dialog.dark .close {
   color: #f3f4f9;
   background: #2a2b38;
-}
-@media (max-width: 600px) {
-  dialog:not(.dark) {
-    width: 100vw;
-    max-width: none;
-    margin: auto 0 0;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  }
 }
 </style>

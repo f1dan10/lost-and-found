@@ -30,7 +30,7 @@
   /* Typography: Source Serif 4 for item titles and headings, Public Sans for everything else. */
   --font-heading: "Source Serif 4", Georgia, "Times New Roman", serif;
   --font-sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  /* 14 / 15 / 16 / 19 / 22 / 28 px. Body text is 16 px so it reads easily on a phone held at arm's length. */
+  /* 14 / 15 / 16 / 19 / 22 / 28 px. Body text is 16 px, the browser's default, so it reads comfortably on a laptop. */
   --text-xs: 0.875rem;
   --text-sm: 0.9375rem;
   --text-base: 1rem;

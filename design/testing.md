@@ -1,6 +1,6 @@
 # Testing
 
-There are two kinds of checks. Automated tests run every concept and every endpoint against a real MongoDB. A manual walk through the app in the browser checks what the tests can't: that the screens update, that mistakes are explained, and that the layout works on a phone.
+There are two kinds of checks. Automated tests run every concept and every endpoint against a real MongoDB. Plain functions behind the screens, such as the search, are tested the same way. A manual walk through the app in the browser checks what the tests can't: that the screens update, that mistakes are explained, and that the layout works on a laptop screen.
 
 The latest test run is saved in [tests/output.txt](../tests/output.txt): 125 tests in 22 files, all passing. The README says how to run them.
 
@@ -57,7 +57,38 @@ These call the endpoints through the same typed client the frontend uses. They w
 
 Each gets `NOT_FOUND` (or `CLAIMING_OWN_REPORT` for your own item). `NOT_FOUND` is the same answer as for a report that doesn't exist, so nobody learns which ids belong to someone else.
 
-## Walking through the app
+### Frontend logic (`tests/frontend/`)
+
+The screens get their lists from plain functions, which are tested without a browser:
+- **`sections.test.ts`** checks what each sidebar section lists, in what order and under which heading. That includes 100 claims with 98 picked up (Your claims shows 2, History holds 98), where a notice opens, and where else a search matches.
+- **`search.test.ts`** checks the search rules: every word must match the start of a word, buildings by number or nickname, plurals, the person on a row, the highlighting, and that typed punctuation can't break it.
+
+## Walking through the web layout
+
+On Oct 21 I ran the production build locally and walked through the app at 1280 × 800 in the browser pane, signed in as Tamar, with Tom and Sam reporting through the API.
+
+| What I checked | Result |
+|---|---|
+| The sidebar counts | Right for every section. "Waiting on you" is tinted only while something waits. |
+| Searching "stata", then "black", then "bottle" | Counts change in every section. The list shows only matches, with the words highlighted. "Also matching: 1 in Lost" links to the other matches. On the map, only the buildings with bottles keep their pins. |
+| Arrow keys in the list | Move the choice up and down, and the panel follows. |
+| Claiming Tom's flask from the panel | It asked "Is this yours?" in place, then moved to Your claims with "It's yours", where to pick it up, and an offer to close my lost bottle report. Closing it worked. |
+| "I picked it up" | Toast: "Marked as picked up. tom will be told." The flask moved to History, and Waiting on you and Your claims dropped to 0. |
+| Saying thanks with a preset note | The panel shows "You thanked tom: 'You saved my day!'". |
+| My open report | Still looking, I got it back, Remove. Renewing showed "Renewed. It stays up for two more weeks." |
+| Someone else's lost jacket | "Report it as found" opens the found form. |
+| A building on the map | Its items list below the map, and choosing one fills the panel. The choice survives the 8-second refresh. |
+| "Report an item" | Opens the two choices under the button; each opens its form. |
+
+### Problems this walk-through found, all fixed
+
+- **Claiming closed the panel.** The claimed item left Found, so the panel lost it. The choice now follows the item to Your claims.
+- **After pickup, the panel still said "It's yours. Here's where to get it."** It now says "Picked up from", and the pickup box goes away.
+- **"1 matches"** became "1 item matches". The sidebar's screen-reader text no longer reads "1 items".
+- **"Report it as found … and sam is told right away"** was not always true, because Sam is only told if the building matches. It now says to report it in the building where it is.
+- **The tagline wrapped onto two lines in the header.** It now shows only on the sign-in page.
+
+## An earlier walk-through, with tabs
 
 On Oct 20 I ran the production build locally (`bun run build`, then `bun run start`). I walked through the app in the browser pane at phone width (334 px). At desktop width I only read the page text, without looking at the layout. Three people were signed up: Tamar in the browser, and Tom and Sam through the API.
 
@@ -92,6 +123,7 @@ On Oct 20 I ran the production build locally (`bun run build`, then `bun run sta
 
 ### Not checked yet
 
+- Screens narrower than 1024 px. The app is for laptop and desktop browsers.
+
 - The same walk-through on the deployed app, and a proper look at the desktop layout.
-- A photo taken with a real phone's camera.
 - A screen reader beyond the accessibility tree.

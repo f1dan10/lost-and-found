@@ -25,7 +25,8 @@ Personal project for 6.1040 Software Design, Fall 2026.
 ## P3: Beta
 
 1. [Visual design study](design/visual-study/README.md): two slides, on typography and colour, with notes on what I used.
-2. [Testing](design/testing.md): what the automated tests cover, and what I checked by walking through the app. The last test run is saved in [tests/output.txt](tests/output.txt).
+2. [Layout](design/layout.md): a sidebar of sections, a list, and a detail panel, with one search box; why the tabs were replaced.
+3. [Testing](design/testing.md): what the automated tests cover, and what I checked by walking through the app. The last test run is saved in [tests/output.txt](tests/output.txt).
 
 ### Run it
 

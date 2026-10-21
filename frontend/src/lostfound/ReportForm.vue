@@ -144,7 +144,7 @@ async function submit() {
         </div>
         <label v-else class="button outline pick">
           <Icon name="camera" :size="18" />Add a photo <span class="hint">optional</span>
-          <input class="file" type="file" accept="image/*" capture="environment" @change="choosePhoto" />
+          <input class="file" type="file" accept="image/*" @change="choosePhoto" />
         </label>
         <button type="submit" class="button primary large post" :disabled="working">
           {{ working ? "Posting…" : lost ? "Post lost item" : "Post found item" }}
@@ -254,24 +254,5 @@ textarea {
 .pick:focus-within {
   outline: 2px solid var(--color-text);
   outline-offset: 2px;
-}
-@media (max-width: 600px) {
-  .where {
-    grid-template-columns: 1fr;
-  }
-  /* On a phone the categories are one row you swipe through, so the post button stays on screen. */
-  .categories {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    margin: 0 calc(-1 * var(--space-6));
-    padding: 2px var(--space-6) 4px;
-    scrollbar-width: none;
-  }
-  .category {
-    flex: none;
-  }
-  .form {
-    gap: var(--space-4);
-  }
 }
 </style>

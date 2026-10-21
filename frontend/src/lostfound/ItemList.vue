@@ -4,7 +4,7 @@ import { useSession } from "../reusable/session.ts";
 import Icon from "../reusable/ui/Icon.vue";
 import { CATEGORIES } from "./categories.ts";
 import ItemRow from "./ItemRow.vue";
-import { search } from "./search.ts";
+import { matchesElsewhere, search } from "./search.ts";
 import { rowsFor, type Row, SECTIONS, type Section } from "./sections.ts";
 import { useLostFound } from "./useLostFound.ts";
 
@@ -72,12 +72,7 @@ const groups = computed(() => {
 });
 
 /** While searching, how many matches each other section has, for "also matching" and the empty state. */
-const elsewhere = computed(() => {
-  if (!query.value.trim()) return [];
-  return SECTIONS.filter((entry) => entry.id !== section.value && entry.id !== "map")
-    .map((entry) => ({ ...entry, count: search(rowsFor(entry.id, lists.value, username.value), query.value).length }))
-    .filter((entry) => entry.count > 0);
-});
+const elsewhere = computed(() => matchesElsewhere(lists.value, username.value, query.value, section.value));
 
 const subtitle = computed(() => {
   const count = rows.value.length;

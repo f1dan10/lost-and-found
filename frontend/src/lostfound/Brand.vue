@@ -73,12 +73,4 @@ defineProps<{ large?: boolean }>();
   margin-top: 6px;
   font-size: var(--text-sm);
 }
-@media (max-width: 600px) {
-  .brand:not(.large) .tagline {
-    display: none;
-  }
-  .brand:not(.large) .name {
-    font-size: 1.5rem;
-  }
-}
 </style>

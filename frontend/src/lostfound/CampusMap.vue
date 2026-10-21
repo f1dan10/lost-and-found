@@ -100,7 +100,7 @@ onUnmounted(() => map?.remove());
 <style scoped>
 .campus-map {
   width: 100%;
-  height: min(520px, 62vh);
+  height: min(460px, 52vh);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-line);

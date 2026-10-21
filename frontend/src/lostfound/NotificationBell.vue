@@ -7,20 +7,24 @@ import { useSession } from "../reusable/session.ts";
 import { sectionOf } from "./sections.ts";
 import { type Notification, useLostFound } from "./useLostFound.ts";
 
-const { lists, notifications, show, markRead, working } = useLostFound();
+const { lists, notifications, query, show, markRead, working } = useLostFound();
 const { me } = useSession();
 
 const count = computed(() => notifications.value.length);
 const badge = computed(() => (count.value > 9 ? "9+" : String(count.value)));
 
 /**
- * Opens the notice: marks it read, then shows the section where the report it is about lives now and chooses it.
- * A match opens Found; a claim, a thank-you or a pickup of my report opens History; an item I claimed opens Waiting on
- * you. A notice about a report that is in no section only shows its text.
+ * Opens the notice: marks it read, then shows the section where the report it is about lives now and chooses it, so
+ * the detail panel shows it. A match opens Found; a claim, a thank-you or a pickup of my report opens History; an
+ * item I claimed and haven't picked up opens Waiting on you. The search is cleared, so it can't hide the item.
+ * A notice about a report that is in no section only shows its text.
  */
 async function open(notice: Notification) {
   const where = sectionOf(notice.subject, lists.value, me.value?.username ?? null);
-  if (where) show(where, notice.subject);
+  if (where) {
+    query.value = "";
+    show(where, notice.subject);
+  }
   await markRead(notice.notification);
 }
 </script>
