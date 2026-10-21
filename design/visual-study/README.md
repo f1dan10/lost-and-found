@@ -1,55 +1,70 @@
 # Visual design study
 
-The two slides are in [visual-study.pdf](visual-study.pdf): one on typography and one on colour. Each slide shows the examples I looked at and notes, in the margin, what I took from them. This page repeats those notes and says where each choice shows up in Lost&Found.
+My study is in [visual-study.pdf](visual-study.pdf), on two pages:
+- **Layout Design**, with a section on typography.
+- **Color Inspiration.**
 
-I compared the options on the real screens before choosing: three palettes and five type options, each drawn on a found card, a lost card, and a claimed card, with colour-blind simulations and contrast ratios.
+Each page collects the examples I looked at and notes what I took from them. This page repeats those notes and says where each choice shows up in Lost&Found.
 
-## What I looked at
+## Layout
 
-**For type:** MBTA station signs, MIT building numbers, newspaper headlines and bylines, lost-item posters around campus, and the US Web Design System.
+A left sidebar with grouped menu items, inspired by Gmail, Linear and Notion. The full layout is described in [layout.md](../layout.md).
 
-**For colour:** the MBTA line colours, the Okabe–Ito colour-blind-safe palette, newsprint, and road signs.
-
-## Typography
-
-| What I noticed | What I chose | Where it shows up |
+| Example | What I took from it | Where it shows up |
 |---|---|---|
-| Transit signs use a bold sans with a tall x-height, so you can read them while walking. | **Public Sans** for everything except item titles. It is neutral like campus signs and stays readable at 13–15 px. | Labels, buildings, times, buttons, forms. |
-| Newspapers set the story in a serif and the facts (byline, time) in a sans. | **Source Serif 4 at weight 600** for the item description, which is the card's title. | Every report card and the detail dialog. A card reads like a small posted notice. |
-| Lost posters lead with one huge word, then what and where. | One clear order on every card: what (title), where (building and spot), who and when (small, muted). | Card layout. |
-| The US Web Design System pairs Public Sans with Source Serif. | That pairing, which mixes a serif and a sans as the course suggests. | The whole app. |
-| Building codes mix the shapes I, l, 1, O and 0 (W20, Building 1, Building 10). | I compared Atkinson Hyperlegible, which tells these shapes apart best, but did **not** choose it: it is wide, so cards fit fewer words per line. Public Sans keeps these shapes distinct enough at our sizes. | Building chips. |
-| Figtree, the Alpha's font, is round and friendly. | **Dropped.** It was also never loaded: `tokens.css` asked for it, but `index.html` had no font link, so every visitor saw their own system font. | |
+| **Gmail's Compose button** | One clear primary action at the top. | "+ Report an item", the one filled button in the header. It opens the two choices: I lost something, I found something. |
+| **Linear's sidebar sections** | Menu items grouped under headings. | The sidebar's two groups, **Campus** (Found, Lost, Map, Returned) and **Yours** (Waiting on you, Your reports, Your claims, History). |
+| **Notion's persistent sidebar** | A left sidebar that is always there. | The sidebar stays in place while the list and the detail panel change, and each entry shows its count. |
 
-**Type scale:** 28 / 19 / 16 / 14 px, for the page title, card title, body and labels. Body text is 16 px so it reads easily on a phone. (My first scale, 26 / 18 / 15 / 13, read too small once I saw the report form.) Emphasis comes from weight, never from a new size.
+## Typography: clear and familiar
 
-## Colour
+A classic serif for headings gives a welcoming, familiar feel. A clean sans-serif for navigation, buttons and item details keeps information readable and easy to scan.
 
-| What I noticed | What I chose | Where it shows up |
+| Role | Font | Where it shows up |
 |---|---|---|
-| Newsprint has no colour until something needs it. | **Ink `#191A1E` on paper `#F4F4F1`** for everything that isn't a state. Primary buttons are ink, not a brand colour. | Page, cards, buttons, top bar. |
-| Road signs: orange asks for attention, blue informs. | **Found `#0369A1` blue**: good news, someone has your thing. **Lost `#C2410C` orange**: someone needs help. | Tabs, chips, card edges, map pins. |
-| The Okabe–Ito palette keeps blue and orange apart for every common kind of colour blindness. | Blue and orange are the only two hues that separate found from lost. | Same. |
-| The T names every line on every sign, so its colours are never the only cue. | Colour is never the only cue. Found has a pin and the word "Found", lost has a magnifier and "Lost", claimed has a check and "Claimed". | Every chip, tab and map pin. |
-| A protanopia simulation turned the Alpha's indigo accent (`#4338CA` → `#0057CE`) into almost the same blue as found (`#0369A1` → `#4E6BA3`). | **Dropped the indigo accent.** | Buttons are ink now. |
-| Most apps colour "done" green. | **Claimed `#475467`, a graphite grey with a check.** A claimed item is finished, so it goes quiet instead of competing with found and lost. Green would also be confused with orange under deuteranopia. | The Claimed tab and claimed cards. |
+| Headings and item titles | **Source Serif 4**: 700 for page and section headings, 600 for item titles | "Found around campus", "Lost around campus", each item's description, the Lost&Found wordmark |
+| Interface | **Libre Franklin**: 400 for body, 600 to 700 for labels and buttons | The sidebar, buttons, buildings, times, forms, e.g. "Report an item · Building 4 · 21 min ago" |
 
-**Contrast (WCAG 2.2):**
+Both fonts load from Google Fonts in `frontend/index.html`, and the tokens are in `frontend/src/reusable/styles/tokens.css`.
+
+**Type scale:** 28 / 19 / 16 / 14 px, for headings, item titles, body and labels. Body text is 16 px, the browser's default. Emphasis comes from weight, not from new sizes.
+
+## Colour: distinct, not similar
+
+Examples: the MBTA transit map, the Olympic pictograms, Google's logo, and painted signposts. Each uses a few bold hues that look very different from each other, so they are easy to tell apart. Similar shades, like red and burgundy, are not. In Lost&Found, each item state gets its own distinct colour.
+
+| State | Colour | Where it shows up |
+|---|---|---|
+| Lost | **Orange `#C2410C`** | Lost tags, the Lost marker in the sidebar, lost pins on the map |
+| Found | **Blue `#1D5FD1`** | Found tags, the Found marker, found pins on the map |
+| Returned (claimed or picked up) | **Green `#15803D`** | Claimed and Picked up tags, the Returned marker, the pickup box |
+| Everything else | **Ink `#191A1E` on paper `#F4F4F1`** | Page, cards and buttons. The primary button is ink, so the only colours on screen mean something. |
+
+Each state colour also has a pale tint for backgrounds: blue `#E8EFFC`, orange `#FCEFE6`, green `#EEF8F1`.
+
+**Colour is never the only cue.** Every tag pairs its colour with a word and an icon:
+- Found: a pin
+- Lost: a magnifier
+- Claimed: a check
+
+**Contrast (WCAG 2.2).** Every text pair passes AA (4.5:1).
 
 | Pair | Ratio |
 |---|---|
-| Text on page | 15.8:1 |
-| White on found | 5.9:1 |
-| White on lost | 5.2:1 |
-| White on claimed | 7.7:1 |
-| Muted text `#5D5F66` on card | 6.4:1 |
-| Lost on its tint | 4.6:1 |
+| Ink text on paper | 15.8:1 |
+| White on blue (found) | 5.8:1 |
+| White on orange (lost) | 5.2:1 |
+| White on green (returned) | 5.0:1 |
+| Muted text `#5D5F66` on white | 6.4:1 |
+| Blue on its tint | 5.0:1 |
+| Orange on its tint | 4.6:1 |
+| Green on its tint | 4.6:1 |
 
-Every text pair passes AA (4.5:1).
+The green tint was made paler until green text on it passed.
 
-## Layout choices from the same study
+**Colour-blind check.** In a deuteranopia simulation, orange and green come out as similar olive tones, while blue stays clearly apart from both. This is why the word and the icon are on every tag: someone who can't tell orange from green still reads "Lost" with a magnifier or "Claimed" with a check.
 
-The full layout is described in [layout.md](../layout.md).
+## Layout principles
 
 - **Fitts's law.**
   - Every target is at least 44 px tall.
@@ -57,6 +72,6 @@ The full layout is described in [layout.md](../layout.md).
   - "Report an item" sits in the header's top-right corner.
   - The main action ("This is mine", "I picked it up") spans the detail panel's width, always in the same place.
 - **Gestalt grouping.**
-  - **Common region:** the three columns are three regions: where you are, what's there, and the one you chose. An owner's actions (renew, close, remove) sit in their own tinted footer.
+  - **Common region:** the three columns are three regions: where you are, what's there, and the one you chose.
   - **Proximity:** every row has the same zones in the same order: picture, title, where and who, then the state tag.
-  - **Similarity:** found, lost and claimed keep one colour and one icon everywhere: rows, tags, sidebar markers and map pins.
+  - **Similarity:** each state keeps one colour and one icon everywhere: rows, tags, sidebar markers and map pins.

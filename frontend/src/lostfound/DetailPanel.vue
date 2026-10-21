@@ -90,7 +90,7 @@ async function closeLost(report: ReportId) {
 <template>
   <article class="detail" :aria-label="label">
     <img v-if="row.photo" class="photo" :src="row.photo" :alt="label" />
-    <div v-else class="photo none" :class="row.kind" aria-hidden="true"><Icon :name="categoryIcon(row.category)" :size="56" /></div>
+    <div v-else class="photo none" :class="row.state === 'claimed' || row.state === 'picked-up' ? 'claimed' : row.kind" aria-hidden="true"><Icon :name="categoryIcon(row.category)" :size="56" /></div>
 
     <h2 class="item-title">{{ row.description }}</h2>
 
@@ -201,6 +201,10 @@ async function closeLost(report: ReportId) {
 .photo.none.lost {
   background: var(--color-lost-soft);
   color: var(--color-lost);
+}
+.photo.none.claimed {
+  background: var(--color-claimed-soft);
+  color: var(--color-claimed);
 }
 .item-title {
   font-size: var(--text-xl);
