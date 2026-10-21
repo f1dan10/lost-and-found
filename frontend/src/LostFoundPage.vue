@@ -45,7 +45,7 @@ const tabs = computed<{ id: Tab; label: string; icon: IconName; count: number | 
           :aria-label="entry.count === null ? entry.label : `${entry.label}, ${entry.count}`"
           @click="tab = entry.id"
         >
-          <Icon :name="entry.icon" :size="18" />
+          <Icon :name="entry.icon" :size="20" />
           <span class="label">{{ entry.label }}</span>
           <span v-if="entry.count !== null" class="count">{{ entry.count }}</span>
         </button>
@@ -65,7 +65,7 @@ const tabs = computed<{ id: Tab; label: string; icon: IconName; count: number | 
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-8);
   max-width: 1168px;
   margin: 0 auto;
   /* Room below the last card for the floating add button. */
@@ -96,9 +96,10 @@ const tabs = computed<{ id: Tab; label: string; icon: IconName; count: number | 
 .tab {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: var(--tap);
-  padding: 0 18px;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  font-size: var(--text-base);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-full);
   background: var(--color-surface);

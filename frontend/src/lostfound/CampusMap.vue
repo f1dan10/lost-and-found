@@ -15,7 +15,8 @@ export interface MapTile {
 
 /**
  * A campus map with one marker per building. A building with reports shows a pill with its found count (blue, pin)
- * and lost count (orange, magnifier); an empty one is a small grey dot. Choosing a marker selects the building.
+ * and lost count (orange, magnifier); an empty one is a small grey dot, shown only when zoomed in. Choosing a marker
+ * selects the building.
  * The base map is Esri's Light Gray Canvas, quiet so the pins stand out.
  */
 const props = defineProps<{ tiles: MapTile[]; selected: string | null }>();
@@ -23,7 +24,6 @@ const emit = defineEmits<{ select: [place: string] }>();
 const element = ref<HTMLElement | null>(null);
 let map: L.Map | undefined;
 let markers: L.LayerGroup | undefined;
-let fitted = false;
 /** What the markers show now, so a poll that changed nothing doesn't redraw them and take a keyboard user's focus away. */
 let drawn = "";
 
@@ -50,6 +50,8 @@ function draw() {
   for (const tile of props.tiles) {
     const on = tile.place === props.selected ? " on" : "";
     const busy = tile.found + tile.lost > 0;
+    // With every campus building on the map, empty ones only appear once you zoom in, or when chosen.
+    if (!busy && !named && tile.place !== props.selected) continue;
     const html = busy
       ? `<span class="lf-pill${on}">${named ? `<span class="lf-name">${escape(tile.name)}</span>` : ""}` +
         (tile.found ? `<span class="lf-count lf-found">${PIN}${tile.found}</span>` : "") +
@@ -70,15 +72,12 @@ function draw() {
     });
     markers.addLayer(marker);
   }
-  if (!fitted && props.tiles.length) {
-    map.fitBounds(L.latLngBounds(props.tiles.map((tile) => [tile.latitude, tile.longitude] as [number, number])), { padding: [40, 40] });
-    fitted = true;
-  }
 }
 
 onMounted(() => {
   if (!element.value) return;
-  map = L.map(element.value, { scrollWheelZoom: false, zoomSnap: 0.5 }).setView([42.3601, -71.0915], 16);
+  // Opens on the main campus, from the Student Center to Kendall; the dorms to the west are a pan away.
+  map = L.map(element.value, { scrollWheelZoom: false, zoomSnap: 0.5 }).setView([42.3598, -71.0915], 16);
   // Esri's Light Gray Canvas needs no API key (CARTO's light style now does). It has detail up to zoom 16;
   // closer than that, Leaflet enlarges the zoom-16 tiles.
   L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {

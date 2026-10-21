@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import LostFoundPage from "./LostFoundPage.vue";
+import Brand from "./lostfound/Brand.vue";
 import NotificationBell from "./lostfound/NotificationBell.vue";
 import PasswordForm from "./reusable/PasswordForm.vue";
 import SignIn from "./reusable/SignIn.vue";
 import { useSession } from "./reusable/session.ts";
 import Avatar from "./reusable/ui/Avatar.vue";
-import Icon from "./reusable/ui/Icon.vue";
 import Menu from "./reusable/ui/Menu.vue";
 
 const { me, checked, load, signOut } = useSession();
@@ -16,11 +16,11 @@ onMounted(load);
 
 <template>
   <header v-if="me" class="topbar">
-    <span class="brand"><span class="logo"><Icon name="logo" :size="20" /></span>Lost&amp;Found</span>
+    <Brand />
     <div class="actions">
       <NotificationBell />
       <Menu label="Account">
-        <template #button><Avatar :username="me.username" :size="36" /></template>
+        <template #button><Avatar :username="me.username" :size="44" /></template>
         <p class="signed-in">Signed in as <strong>{{ me.username }}</strong></p>
         <button type="button" @click="signOut">Sign out</button>
       </Menu>
@@ -28,9 +28,12 @@ onMounted(load);
   </header>
   <main v-if="checked" class="content">
     <LostFoundPage v-if="me" />
-    <SignIn v-else icon="logo" lead="Find what you lost. Report what you found.">
-      <PasswordForm />
-    </SignIn>
+    <div v-else class="welcome">
+      <Brand large />
+      <SignIn icon="logo" lead="Find what you lost. Report what you found.">
+        <PasswordForm />
+      </SignIn>
+    </div>
   </main>
 </template>
 
@@ -42,28 +45,25 @@ onMounted(load);
   gap: var(--space-4);
   max-width: 1168px;
   margin: 0 auto;
-  padding: 18px 24px;
+  padding: 20px 24px 12px;
 }
-.brand {
+.welcome {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  font-size: var(--text-lg);
-  font-weight: 700;
+  padding-top: var(--space-12);
 }
-.logo {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-sm);
-  background: var(--color-accent);
-  color: #ffffff;
+/* The wordmark above already shows the logo, so the sign-in card doesn't repeat it. */
+.welcome :deep(.form-card) {
+  margin-top: var(--space-8);
+}
+.welcome :deep(.form-card > .logo) {
+  display: none;
 }
 .actions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 .signed-in {
   padding: 8px 10px;

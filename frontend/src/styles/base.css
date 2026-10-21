@@ -52,10 +52,16 @@
   flex-direction: column;
   gap: 2px;
 }
+.tab-intro {
+  gap: 4px;
+}
 .tab-intro h2 {
-  font-size: var(--text-2xl);
+  font-size: 2rem;
+  line-height: 1.15;
 }
 .tab-intro p {
+  max-width: 62ch;
+  font-size: var(--text-lg);
   color: var(--color-text-muted);
 }
 
@@ -66,12 +72,12 @@
   gap: var(--space-2);
 }
 .filter {
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: 42px;
+  padding: 0 18px;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-full);
   background: var(--color-surface);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: 600;
 }
 .filter.on {

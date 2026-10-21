@@ -38,7 +38,7 @@ async function open(notice: Notification) {
   <Menu :label="count ? `Notifications, ${count} unread` : 'Notifications'">
     <template #button>
       <span class="bell">
-        <Icon name="bell" :size="22" />
+        <Icon name="bell" :size="24" />
         <span v-if="count" class="badge" aria-hidden="true">{{ badge }}</span>
       </span>
     </template>

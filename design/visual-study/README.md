@@ -21,7 +21,7 @@ I compared the options on the real screens before choosing: three palettes and f
 | Building codes mix the shapes I, l, 1, O and 0 (W20, Building 1, Building 10). | I compared Atkinson Hyperlegible, which tells these shapes apart best, but did **not** choose it: it is wide, so cards fit fewer words per line. Public Sans keeps these shapes distinct enough at our sizes. | Building chips. |
 | Figtree, the Alpha's font, is round and friendly. | **Dropped.** It was also never loaded: `tokens.css` asked for it, but `index.html` had no font link, so every visitor saw their own system font. | |
 
-**Type scale:** 26 / 18 / 15 / 13 px, for the page title, card title, body and labels. Emphasis comes from weight, never from a new size.
+**Type scale:** 28 / 19 / 16 / 14 px, for the page title, card title, body and labels. Body text is 16 px so it reads easily on a phone. (My first scale, 26 / 18 / 15 / 13, read too small once I saw the report form.) Emphasis comes from weight, never from a new size.
 
 ## Colour
 

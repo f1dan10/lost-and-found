@@ -2,8 +2,11 @@
 import { onMounted, ref, useId } from "vue";
 import Icon from "./Icon.vue";
 
-/** A modal dialog, opened with `showModal` when it mounts. Set `dark` to show a picture on a dark backdrop that fills the screen. */
-defineProps<{ title: string; subtitle?: string; dark?: boolean }>();
+/**
+ * A modal dialog, opened with `showModal` when it mounts. Set `dark` to show a picture on a dark backdrop that fills
+ * the screen, and `wide` for a form that should fit on a laptop screen without scrolling.
+ */
+defineProps<{ title: string; subtitle?: string; dark?: boolean; wide?: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 const dialog = ref<HTMLDialogElement | null>(null);
 const titleId = useId();
@@ -14,7 +17,7 @@ onMounted(() => dialog.value?.showModal());
 <template>
   <dialog
     ref="dialog"
-    :class="{ dark }"
+    :class="{ dark, wide }"
     :aria-labelledby="titleId"
     @close="emit('close')"
     @click.self="dialog?.close()"
@@ -70,8 +73,15 @@ h2 {
 }
 .subtitle {
   margin-top: 2px;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
+}
+/* Wide only on a larger screen; on a phone every dialog is a full-width sheet at the bottom. */
+@media (min-width: 601px) {
+  dialog.wide {
+    width: min(720px, calc(100vw - 32px));
+    margin: auto;
+  }
 }
 .close {
   width: 40px;

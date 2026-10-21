@@ -84,6 +84,8 @@ On Oct 20 I ran the production build locally (`bun run build`, then `bun run sta
 - **Building names overlapped on a phone.** Zoomed out, pins show only their counts; names appear from zoom 17, and every pin keeps its name as its label.
 - **The building list sorted as text** (1, 10, 13, 2). It now sorts as numbers.
 - **The tab buttons had no accessible names**, and the building checkboxes were named by their ids. Both now have proper labels.
+- **The report form had to be scrolled, and its text was small.** I replaced the long list of building checkboxes with a search box: type "32" or "stata", pick the suggestion, and it becomes a chip. The form is now two columns on a laptop and fits without scrolling (531 px tall on a 900 px screen). Categories became icon chips. Body text went from 15 to 16 px.
+- **Only 24 buildings were listed.** The seed now has all 112 MIT buildings with a number in OpenStreetMap. Utility structures such as the power plant and cooling towers are left out. On the map, empty buildings appear only when you zoom in.
 - **The toast squeezed into half the width** on a phone.
 - **The lost form's subtitle said the wrong people would be told.**
 - **The claim refusals didn't say what happened next.** They now say where the item went.

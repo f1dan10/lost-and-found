@@ -62,7 +62,7 @@ function switchMode() {
       />
       <span v-if="creating" class="hint">8 to 128 characters</span>
     </label>
-    <button type="submit" class="button outline large" :disabled="working">{{ words.action }}</button>
+    <button type="submit" class="button primary large" :disabled="working">{{ words.action }}</button>
     <p class="switch">
       {{ words.other }} <button type="button" class="text-button" @click="switchMode">{{ words.switchTo }}</button>
     </p>
