@@ -23,3 +23,13 @@ The person who claimed an item still needs to know where to pick it up after the
 ```endpoints
 claims.listing.ListMyClaims at /claims/mine
 ```
+
+## Picking up
+
+A claim says who will take an item, but not whether they have. Once the claimant has the item in hand, the [pickup endpoint](reaction:claims.collecting.CollectClaim) records it. It first calls `Sessioning.use`, which returns the person's user from their session, and has two branches. `mine` runs when the person [claimed the report](view:access.permissions.claimed): the endpoint calls `Claiming.collect` and responds with the report. `refused` runs when they didn't, or the report doesn't exist: the request is refused with `NOT_FOUND`, the same answer for both. A second pickup of the same item is refused by `Claiming` with `ALREADY_COLLECTED`. The claimant's own claims carry `collectedAt` from `Claiming._getCollected`, so the screen can move a picked-up claim out of what is waiting on them and into their history.
+
+```endpoints
+claims.collecting.CollectClaim at /claims/collect
+```
+
+The reaction [tell the finder it was picked up](reaction:claims.collecting.NotifyFinderOfPickup) runs when `Claiming.collect` returns. It looks up the report's reporter with `Reporting._getReport` and calls `Notifying.notify` with the message "Your found item was picked up." and the report as the subject, so the finder knows the item reached its owner.

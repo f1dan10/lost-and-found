@@ -70,12 +70,13 @@ const RenewReport = endpoint(
 /**
  * Every report the user filed, newest first, open or closed, with its kind, status, and expiry so the screen can
  * offer the right actions, such as renewing one that has expired. The spot and the photo are null when a report has none. `claimedBy` is the username of whoever
- * claimed a found report, shown only here to the person who found it, and null while it is unclaimed. `thankedAt`
+ * claimed a found report, shown only here to the person who found it, and null while it is unclaimed. `collectedAt`
+ * says when the claimant picked it up, and is null until then. `thankedAt`
  * and `thanksNote` say when the claimant thanked them and what they wrote, and are null until then.
  */
 export const myReports = former(
   "the reports of (user)",
-  ({ user }, { report, kind, category, description, filedAt, expiresAt, status, place, name, spot, photo, claimant, claimedBy, thankedAt, thanksNote }) =>
+  ({ user }, { report, kind, category, description, filedAt, expiresAt, status, place, name, spot, photo, claimant, claimedBy, collectedAt, thankedAt, thanksNote }) =>
     each(Reporting._getByReporter({ reporter: user }).is({ report }))
       .where(
         Reporting._getReport({ report }).is({ kind, category, description, filedAt, expiresAt, status }),
@@ -83,6 +84,7 @@ export const myReports = former(
         whether(Reporting._getPhoto({ report }).is({ photo })),
         whether(Claiming._getClaimant({ item: report }).is({ claimant })),
         whether(Registering._username({ user: claimant }).is({ username: claimedBy })),
+        whether(Claiming._getCollected({ item: report }).is({ collectedAt })),
         whether(Thanking._getThanks({ item: report }).is({ thankedAt })),
         whether(Thanking._getNote({ item: report }).is({ note: thanksNote })),
       )
@@ -95,6 +97,7 @@ export const myReports = former(
         expiresAt,
         status,
         claimedBy,
+        collectedAt,
         thankedAt,
         thanksNote,
         spot,

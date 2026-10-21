@@ -1,6 +1,8 @@
 import { type Collection, type Db, MongoServerError } from "mongodb";
 
 export class AlreadyClaimed extends Error {}
+export class NotClaimed extends Error {}
+export class AlreadyCollected extends Error {}
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -8,6 +10,8 @@ interface ClaimDocument<Claimant, Item> {
   _id: Item;
   claimant: Claimant;
   claimedAt: Date;
+  /** When the claimant picked the item up; missing until then. */
+  collectedAt?: Date;
 }
 
 /** Makes taking a thing accountable by recording who took it. */
@@ -32,6 +36,22 @@ export class ClaimingConcept<Claimant extends string, Item extends string> {
       throw error;
     }
     return { item };
+  }
+
+  /** The claimant has the item in hand. One conditional update decides it, so two requests at once can't both succeed. */
+  async collect({ item }: { item: Item }) {
+    const { matchedCount } = await this.claims.updateOne(
+      { _id: item, collectedAt: { $exists: false } },
+      { $set: { collectedAt: this.clock() } },
+    );
+    if (matchedCount > 0) return { item };
+    if ((await this.claims.countDocuments({ _id: item })) === 0) throw new NotClaimed("Nobody has claimed this item.");
+    throw new AlreadyCollected("This item was already picked up.");
+  }
+
+  async _getCollected({ item }: { item: Item }) {
+    const found = await this.claims.findOne({ _id: item });
+    return found?.collectedAt === undefined ? [] : [{ collectedAt: found.collectedAt }];
   }
 
   async _getClaimant({ item }: { item: Item }) {

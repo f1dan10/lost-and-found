@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { AlreadyClaimed, ClaimingConcept } from "../../src/concepts/Claiming/Claiming.ts";
+import { AlreadyClaimed, AlreadyCollected, ClaimingConcept, NotClaimed } from "../../src/concepts/Claiming/Claiming.ts";
 import { testDatabase } from "../support/reusable/mongo.ts";
 import { expectOneWinner } from "../support/reusable/race.ts";
 
@@ -82,6 +82,46 @@ describe("Claiming", () => {
       { item: "bottle", claimedAt: NOON },
     ]);
     expect(await claiming._byClaimant({ claimant: "nobody" })).toEqual([]);
+  });
+
+  test("its principle, continued: Tamar picks the bottle up once, anyone is told when, and a second pickup is refused", async () => {
+    let now = NOON;
+    const claiming = new ClaimingConcept<string, string>(await testDatabase(), "Claiming", () => now);
+    await claiming.claim({ claimant: "tamar", item: "bottle" });
+    expect(await claiming._getCollected({ item: "bottle" })).toEqual([]);
+
+    now = new Date(NOON.getTime() + 60 * 60 * 1000);
+    expect(await claiming.collect({ item: "bottle" })).toEqual({ item: "bottle" });
+    expect(await claiming._getCollected({ item: "bottle" })).toEqual([{ collectedAt: now }]);
+
+    const again = claiming.collect({ item: "bottle" });
+    await expect(again).rejects.toThrow(AlreadyCollected);
+    await expect(again).rejects.toThrow("This item was already picked up.");
+    expect(await claiming._getCollected({ item: "bottle" })).toEqual([{ collectedAt: now }]);
+    expect(await claiming._getClaimant({ item: "bottle" })).toEqual([{ claimant: "tamar", claimedAt: NOON }]);
+  });
+
+  test("picking up an item nobody claimed is refused with NOT_CLAIMED, and nothing is recorded", async () => {
+    const { claiming } = await setup();
+    await expect(claiming.collect({ item: "keys" })).rejects.toThrow(NotClaimed);
+    await expect(claiming.collect({ item: "keys" })).rejects.toThrow("Nobody has claimed this item.");
+    expect(await claiming._getCollected({ item: "keys" })).toEqual([]);
+    expect(await claiming._getClaimant({ item: "keys" })).toEqual([]);
+  });
+
+  test("of two simultaneous pickups of one item, one succeeds and the other is refused", async () => {
+    const { claiming } = await setup();
+    await claiming.claim({ claimant: "tamar", item: "bottle" });
+    await expectOneWinner([claiming.collect({ item: "bottle" }), claiming.collect({ item: "bottle" })], AlreadyCollected);
+    expect(await claiming._getCollected({ item: "bottle" })).toEqual([{ collectedAt: NOON }]);
+  });
+
+  test("picking up one item leaves the others not picked up", async () => {
+    const { claiming } = await setup();
+    await claiming.claim({ claimant: "tamar", item: "bottle" });
+    await claiming.claim({ claimant: "tamar", item: "keys" });
+    await claiming.collect({ item: "bottle" });
+    expect(await claiming._getCollected({ item: "keys" })).toEqual([]);
   });
 
   test("an unclaimed or unknown item has no claimant", async () => {

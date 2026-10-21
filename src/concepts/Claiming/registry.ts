@@ -3,14 +3,14 @@ import spec from "@design/concepts/Claiming.md" with { type: "text" };
 import type { Db } from "mongodb";
 import type { User } from "../Registering/Registering.ts";
 import type { Report } from "../Reporting/Reporting.ts";
-import { AlreadyClaimed, ClaimingConcept } from "./Claiming.ts";
+import { AlreadyClaimed, AlreadyCollected, ClaimingConcept, NotClaimed } from "./Claiming.ts";
 
 class Claiming extends ClaimingConcept<User, Report> {}
 
 export const claiming = registerConcept({
   class: Claiming,
   spec,
-  refusals: { ALREADY_CLAIMED: AlreadyClaimed },
+  refusals: { ALREADY_CLAIMED: AlreadyClaimed, NOT_CLAIMED: NotClaimed, ALREADY_COLLECTED: AlreadyCollected },
   floors: {
     mongo: ({ database, clock }: { database: Db; clock?: () => Date }, name: string) => new Claiming(database, name, clock),
   },

@@ -37,10 +37,14 @@ Defined in [Claiming](../design/concepts/Claiming.md), line 1.
 
 - `claim(claimant: Claimant, item: Item) : returns (item: Item)`
   - Refuses `ALREADY_CLAIMED`: This item has already been claimed.
+- `collect(item: Item) : returns (item: Item)`
+  - Refuses `NOT_CLAIMED`: Nobody has claimed this item.
+  - Refuses `ALREADY_COLLECTED`: This item was already picked up.
 
 #### Queries
 
 - `_getClaimant(item: Item) : optional (claimant: Claimant, claimedAt: DateTime)`
+- `_getCollected(item: Item) : optional (collectedAt: DateTime)`
 - `_recent(days: Number) : many (item: Item, claimant: Claimant, claimedAt: DateTime)`
 - `_byClaimant(claimant: Claimant) : many (item: Item, claimedAt: DateTime)`
 
@@ -221,6 +225,7 @@ Authored path: `access.permissions.isOpenFound`.
 
 Authored path: `access.permissions.claimed`.
 - Covered by [Access](../design/compositions/access.md), line 9.
+- Covered by [Claims](../design/compositions/claims.md), line 29.
 - Covered by [Thanks](../design/compositions/thanks.md), line 3.
 
 ```view
@@ -275,17 +280,19 @@ Authored path: `claims.listing.myClaims`.
 - Covered by [Claims](../design/compositions/claims.md), line 21.
 
 ```former
-Former "the claims of (user)" — inputs (user); bindings (report, claimedAt, category, description, reporter, foundBy, place, name, spot, photo, thankedAt, thanksNote); promises exactly one record — forms:
+Former "the claims of (user)" — inputs (user); bindings (report, claimedAt, category, description, reporter, foundBy, place, name, spot, photo, collectedAt, thankedAt, thanksNote); promises exactly one record — forms:
   each Claiming._byClaimant (claimant: user) has (claimedAt, item: report)
     where Reporting._getReport (report) has (category, description, reporter)
     where Registering._username (user: reporter) has (username: foundBy)
     where whether Locating._getSpot (item: report) has (spot)
     where whether Reporting._getPhoto (report) has (photo)
+    where whether Claiming._getCollected (item: report) has (collectedAt)
     where whether Thanking._getThanks (item: report) has (thankedAt)
     where whether Thanking._getNote (item: report) has (note: thanksNote)
     form a record of
       category
       claimedAt
+      collectedAt
       description
       foundBy
       photo
@@ -357,18 +364,20 @@ Authored path: `owning.listing.myReports`.
 - Covered by [Owning](../design/compositions/owning.md), line 21.
 
 ```former
-Former "the reports of (user)" — inputs (user); bindings (report, kind, category, description, filedAt, expiresAt, status, place, name, spot, photo, claimant, claimedBy, thankedAt, thanksNote); promises exactly one record — forms:
+Former "the reports of (user)" — inputs (user); bindings (report, kind, category, description, filedAt, expiresAt, status, place, name, spot, photo, claimant, claimedBy, collectedAt, thankedAt, thanksNote); promises exactly one record — forms:
   each Reporting._getByReporter (reporter: user) has (report)
     where Reporting._getReport (report) has (category, description, expiresAt, filedAt, kind, status)
     where whether Locating._getSpot (item: report) has (spot)
     where whether Reporting._getPhoto (report) has (photo)
     where whether Claiming._getClaimant (item: report) has (claimant)
     where whether Registering._username (user: claimant) has (username: claimedBy)
+    where whether Claiming._getCollected (item: report) has (collectedAt)
     where whether Thanking._getThanks (item: report) has (thankedAt)
     where whether Thanking._getNote (item: report) has (note: thanksNote)
     form a record of
       category
       claimedBy
+      collectedAt
       description
       expiresAt
       filedAt
@@ -534,6 +543,75 @@ Authored path: `claims.claiming.ResolveOnClaim`.
 when Claiming.claim (item: report)
 then
   Reporting.resolve (report)
+```
+
+### claims.collecting.CollectClaim
+
+Authored path: `claims.collecting.CollectClaim`.
+- Covered by [Claims](../design/compositions/claims.md), line 29.
+- Covered by [Claims](../design/compositions/claims.md), line 32.
+
+```reaction
+when RequestBoundary.request (path: "/claims/collect", report, requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### claims.collecting.CollectClaim:mine#2
+
+Authored path: `claims.collecting.CollectClaim`.
+- Covered by [Claims](../design/compositions/claims.md), line 29.
+- Covered by [Claims](../design/compositions/claims.md), line 32.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by claims.collecting.CollectClaim
+where
+  earlier, RequestBoundary.request (path: "/claims/collect", report, requestId, session)
+  view "(user) claimed (report)" with (report, user)
+then
+  Claiming.collect (item: report)
+```
+
+### claims.collecting.CollectClaim:mine#3
+
+Authored path: `claims.collecting.CollectClaim`.
+- Covered by [Claims](../design/compositions/claims.md), line 29.
+- Covered by [Claims](../design/compositions/claims.md), line 32.
+
+```reaction
+when Claiming.collect (item: report), asked by claims.collecting.CollectClaim:mine#2
+where
+  earlier, RequestBoundary.request (path: "/claims/collect", report, requestId, session)
+then
+  RequestBoundary.respond (report, requestId)
+```
+
+### claims.collecting.CollectClaim:refused#2
+
+Authored path: `claims.collecting.CollectClaim`.
+- Covered by [Claims](../design/compositions/claims.md), line 29.
+- Covered by [Claims](../design/compositions/claims.md), line 32.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by claims.collecting.CollectClaim
+where
+  earlier, RequestBoundary.request (path: "/claims/collect", report, requestId, session)
+  no view "(user) claimed (report)" with (report, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### claims.collecting.NotifyFinderOfPickup
+
+Authored path: `claims.collecting.NotifyFinderOfPickup`.
+- Covered by [Claims](../design/compositions/claims.md), line 35.
+
+```reaction
+when Claiming.collect (item: report)
+where
+  Reporting._getReport (report) has (reporter)
+then
+  Notifying.notify (message: "Your found item was picked up.", recipient: reporter, subject: report)
 ```
 
 ### claims.listing.ListClaims
@@ -1272,6 +1350,7 @@ not listed here have no explicit input contract.
 - `/auth/logout` — requires `session`
 - `/auth/me` — requires `session`
 - `/auth/register` — requires `password`, `username`
+- `/claims/collect` — requires `report`, `session`
 - `/claims/list` — requires `session`
 - `/claims/mine` — requires `session`
 - `/notifications/list` — requires `session`

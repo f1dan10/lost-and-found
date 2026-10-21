@@ -6,4 +6,4 @@ A person [owns a report](view:access.permissions.owns) when they filed it, and o
 
 A report [is an open found report](view:access.permissions.isOpenFound) when `Reporting._getOpen` returns it among the FOUND reports: it was filed as FOUND, its status is still OPEN, and it has not expired. Only such a report can be claimed, so an item nobody has renewed in two weeks, which has probably gone, can't be.
 
-A person [claimed a report](view:access.permissions.claimed) when Claiming records them as its claimant. Only they can thank the finder for it.
+A person [claimed a report](view:access.permissions.claimed) when Claiming records them as its claimant. Only they can thank the finder for it, or mark it picked up.
