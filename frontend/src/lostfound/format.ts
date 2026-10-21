@@ -1,20 +1,10 @@
 import type { IconName } from "../reusable/ui/Icon.vue";
+import { CATEGORIES } from "./categories.ts";
 
-/** Every category, in the order the chips show them, with the label and icon for each. */
-export const CATEGORIES = [
-  { value: "BOTTLE", label: "Bottle", icon: "bottle" },
-  { value: "CLOTHING", label: "Clothing", icon: "clothing" },
-  { value: "ELECTRONICS", label: "Electronics", icon: "electronics" },
-  { value: "KEYS_ID", label: "Keys / ID", icon: "keys" },
-  { value: "BAG", label: "Bag", icon: "bag" },
-  { value: "JEWELRY", label: "Jewelry", icon: "jewelry" },
-  { value: "OTHER", label: "Other", icon: "other" },
-] as const satisfies readonly { value: string; label: string; icon: IconName }[];
+export { CATEGORIES, categoryLabel } from "./categories.ts";
 
-/** The label for a category, such as "Keys / ID" for KEYS_ID. */
-export function categoryLabel(category: string): string {
-  return CATEGORIES.find((entry) => entry.value === category)?.label ?? category;
-}
+// Every category's icon must be one the Icon component draws.
+CATEGORIES satisfies readonly { icon: IconName }[];
 
 /** The icon shown for a report that has no photo. */
 export function categoryIcon(category: string): IconName {
