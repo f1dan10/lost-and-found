@@ -24,6 +24,8 @@ Personal project for 6.1040 Software Design, Fall 2026.
 
 ## P3: Beta
 
+**Live app:** https://lostandfound.mit-sdg.dev/
+
 What's new since the Alpha:
 - **Features:** reports expire after 14 days and can be renewed, owners can close or remove their reports, a lost report filed after a find is matched too, claimed items are listed, a claimer marks an item picked up and can thank the finder, every MIT building can be chosen, and the map is a real campus map.
 - **Interface:** a website layout with a sidebar of sections, a list and a detail panel, and one search box for everything.

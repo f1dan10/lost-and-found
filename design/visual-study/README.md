@@ -18,7 +18,7 @@ A left sidebar with grouped menu items, inspired by Gmail, Linear and Notion. Th
 
 ## Typography: clear and familiar
 
-A classic serif for headings gives a welcoming, familiar feel. A clean sans-serif for navigation, buttons and item details keeps information readable and easy to scan.
+The type in Gmail, Linear and Notion feels welcoming. Each uses one clean sans-serif for navigation, buttons and details, and makes text bolder rather than bigger for emphasis. I use the same for the interface, so information stays readable and easy to scan. I added a classic serif for headings to keep that welcoming, familiar feel.
 
 | Role | Font | Where it shows up |
 |---|---|---|
