@@ -38,6 +38,8 @@ const section = ref<Section>("found");
 const selected = ref<{ section: Section; report: ReportId } | null>(null);
 /** What is typed in the search box. */
 const query = ref("");
+/** The report form that is open, if any: what the person is reporting. */
+const reporting = ref<"found" | "lost" | null>(null);
 /** False until the first refresh finishes, so the page can say "Loading…" instead of "Nothing found yet". */
 const loaded = ref(false);
 const error = ref<string | null>(null);
@@ -247,6 +249,7 @@ function reset() {
   section.value = "found";
   selected.value = null;
   query.value = "";
+  reporting.value = null;
   loaded.value = false;
   error.value = null;
   working.value = false;
@@ -269,6 +272,7 @@ export function useLostFound() {
     section,
     selected,
     query,
+    reporting,
     show,
     loaded,
     error,
