@@ -24,9 +24,14 @@ Personal project for 6.1040 Software Design, Fall 2026.
 
 ## P3: Beta
 
-1. [Visual design study](design/visual-study/README.md): two slides, on typography and colour, with notes on what I used.
-2. [Layout](design/layout.md): a sidebar of sections, a list, and a detail panel, with one search box; why the tabs were replaced.
-3. [Testing](design/testing.md): what the automated tests cover, and what I checked by walking through the app. The last test run is saved in [tests/output.txt](tests/output.txt).
+What's new since the Alpha:
+- **Features:** reports expire after 14 days and can be renewed, owners can close or remove their reports, a lost report filed after a find is matched too, claimed items are listed, a claimer marks an item picked up and can thank the finder, every MIT building can be chosen, and the map is a real campus map.
+- **Interface:** a website layout with a sidebar of sections, a list and a detail panel, and one search box for everything.
+
+1. [Beta user journey](design/beta-journey.md)
+2. [Visual design study](design/visual-study/README.md): Layout Design (with typography) and Color Inspiration, with notes on what I used.
+3. [Layout](design/layout.md): a sidebar of sections, a list, and a detail panel, with one search box; why the tabs were replaced.
+4. [Testing](design/testing.md): what the automated tests cover, and what I checked by walking through the app. The last test run is saved in [tests/output.txt](tests/output.txt).
 
 ### Run it
 

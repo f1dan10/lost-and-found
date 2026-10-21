@@ -92,6 +92,8 @@ The P1 sketches and journey (`design/p1/ui-sketches.md`, `design/p1/user-journey
 
 ## What remains for P3
 
+*Update for P3:* these are done, except MIT-only sign-in, real email, undoing a claim, and photo storage. See [layout.md](layout.md), [testing.md](testing.md), and the P3 section of the README.
+
 - **Reports that expire.** Add `expire` and `renew` to Reporting, and `confirm` to Locating, so a report drops off after 14 days unless the person says the item is still there (P1's R4).
 - **Withdrawing a report.** `Reporting.withdraw` exists, but no endpoint or button uses it yet.
 - **A lost report filed after a found item.** Only a new found report notifies owners. If Tamar posts after Tom, she sees his card in the list but gets no notice.
