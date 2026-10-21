@@ -80,6 +80,28 @@ On Oct 21 I ran the production build locally and walked through the app at 1280 
 | A building on the map | Its items list below the map, and choosing one fills the panel. The choice survives the 8-second refresh. |
 | "Report an item" | Opens the two choices under the button; each opens its form. |
 
+### Deploy check, Oct 21
+
+Before redeploying, I cloned the pushed commit into an empty folder and built it the way the platform does, with frozen lockfiles: `bun install`, then `bun run build`, then `bun run start`.
+- **Server:** `/health` answered `ok`, an inner page answered 200, and the seed added 112 buildings.
+- **Size:** the repository is 4.4 MB.
+- **Access control over real HTTP:**
+
+| Request | Status |
+|---|---|
+| Sam removes Tom's report | 404 |
+| Tom claims his own item | 403 |
+| Tamar claims it | 200 |
+| Sam or Tom marks it picked up | 404 |
+| Sam thanks for it | 404 |
+| Tamar marks it picked up | 200 |
+| Tamar marks it picked up again | 409 |
+| No session | 401 |
+
+Tom received "Your found item was claimed." and "Your found item was picked up."
+
+At 1024 × 720 and 1440 × 900 the page never scrolls sideways. At 1024 px "Waiting on you" wrapped onto two lines in the sidebar, so the sidebar grew to 232 px and its labels stay on one line.
+
 ### Problems this walk-through found, all fixed
 
 - **Claiming closed the panel.** The claimed item left Found, so the panel lost it. The choice now follows the item to Your claims.

@@ -213,7 +213,7 @@ async function closeLost(report: ReportId) {
 }
 .facts div {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: 116px minmax(0, 1fr);
   gap: var(--space-3);
 }
 dt {

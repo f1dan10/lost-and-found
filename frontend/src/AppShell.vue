@@ -188,10 +188,10 @@ onUnmounted(reset);
 }
 @media (max-width: 1200px) {
   .head {
-    grid-template-columns: 220px minmax(0, 1fr) auto;
+    grid-template-columns: 232px minmax(0, 1fr) auto;
   }
   .cols {
-    grid-template-columns: 220px minmax(0, 1fr) 300px;
+    grid-template-columns: 232px minmax(0, 1fr) 300px;
   }
 }
 </style>
