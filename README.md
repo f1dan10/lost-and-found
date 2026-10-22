@@ -19,7 +19,7 @@ A lost-and-found web app for MIT. A finder reports an item with one photo and le
 
 1. [Alpha user journey](design/alpha-journey.md)
 2. [Design notes](design/notes.md), including the [plan](design/notes.md#plan)
-3. [Screen recording](design/demo.mp4)
+3. [Screen recording](https://github.com/f1dan10/lost-and-found/blob/3ead208/design/demo.mp4)
 4. [Concepts](design/concepts), [compositions](design/compositions) and [types](design/types.md)
 
 ## P3: Beta

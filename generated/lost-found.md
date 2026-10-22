@@ -534,6 +534,22 @@ then
   Notifying.notify (message: "Your found item was claimed.", recipient: reporter, subject: report)
 ```
 
+### claims.claiming.ResolveClaimantsLost
+
+Authored path: `claims.claiming.ResolveClaimantsLost`.
+- Covered by [Claims](../design/compositions/claims.md), line 9.
+
+```reaction
+when Claiming.claim (claimant, item: report)
+where
+  Reporting._getReport (report) has (category, kind: "FOUND")
+  Locating._getNeighbors (item: report) has (other: lost)
+  Reporting._getOpen (category, kind: "LOST") has (report: lost)
+  Reporting._getReport (report: lost) has (reporter: claimant)
+then
+  Reporting.resolve (report: lost)
+```
+
 ### claims.claiming.ResolveOnClaim
 
 Authored path: `claims.claiming.ResolveOnClaim`.

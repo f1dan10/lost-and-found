@@ -1,6 +1,6 @@
 # Testing
 
-156 automated tests in 24 files all pass. The last run is in [tests/output.txt](../tests/output.txt). The tests run against a real MongoDB.
+157 automated tests in 24 files all pass. The last run is in [tests/output.txt](../tests/output.txt). The tests run against a real MongoDB.
 
 ## Concepts (`tests/concepts/`)
 

@@ -10,7 +10,10 @@ The first Beta had five tabs: Found, Lost, Map, Claimed, Yours.
 - Nothing showed what needed you.
 - Finished items never left.
 
-I tried six layouts as mockups. The sidebar with a detail panel fit a website best.
+I tried six layouts as mockups. The sidebar with a detail panel fit a website best. It was inspired by:
+- **Gmail:** one primary action at the top, "Report an item".
+- **Linear:** sidebar sections grouped into Campus and Yours.
+- **Notion:** a sidebar that is always there.
 
 ## Sections
 

@@ -70,12 +70,21 @@ const facts = computed(() => {
   return list;
 });
 
-/** My open lost reports of the same category, which the claim probably answers. */
-const myLost = computed(() =>
-  mine.value.filter(
-    (report) => report.status === "OPEN" && report.kind === "LOST" && report.category === props.row.category && !closed.value.includes(report.report),
-  ),
-);
+/**
+ * My open lost reports of the same category, which the claim probably answers. Those sharing a building with the item
+ * are closed by the claim itself, so only the others are offered.
+ */
+const myLost = computed(() => {
+  const here = new Set(props.row.places.map((place) => place.place));
+  return mine.value.filter(
+    (report) =>
+      report.status === "OPEN" &&
+      report.kind === "LOST" &&
+      report.category === props.row.category &&
+      !report.places.some((place) => here.has(place.place)) &&
+      !closed.value.includes(report.report),
+  );
+});
 
 async function confirmClaim() {
   await claim(props.row.report);

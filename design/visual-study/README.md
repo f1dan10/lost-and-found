@@ -1,17 +1,15 @@
 # Visual design study
 
-The study is in [visual-study.pdf](visual-study.pdf): Layout Design and Color Inspiration.
-
-## Layout
-
-From Gmail, Linear and Notion:
-- **Gmail:** one primary action at the top, "Report an item".
-- **Linear:** the sidebar is grouped into Campus and Yours.
-- **Notion:** a sidebar that is always there.
+The study is in [visual-study.pdf](visual-study.pdf): Typography Inspiration and Color Inspiration. The layout is explained in [layout.md](../layout.md).
 
 ## Typography
 
-The type in Gmail, Linear and Notion feels welcoming: one clean sans-serif, with bolder text instead of bigger text for emphasis. I added a classic serif for headings.
+The type in Gmail, Linear and Notion feels welcoming and easy to scan:
+- **Gmail:** bold for what matters, all at one size.
+- **Linear:** three clear levels: heading, body, and grey details.
+- **Notion:** one big title and quiet grey section labels.
+
+I use a clean sans-serif like theirs, and added a classic serif for headings.
 - **Source Serif 4:** headings (700) and item titles (600)
 - **Libre Franklin:** the interface (400 for body text, 600–700 for labels)
 - **Sizes:** 28, 19, 16 and 14 px

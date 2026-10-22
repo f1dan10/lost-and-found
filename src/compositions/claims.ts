@@ -35,6 +35,22 @@ const ResolveOnClaim = reaction(({ report }) =>
   when(Claiming.claim({ item: report }).responds({ item: report })).then(Reporting.resolve({ report })),
 );
 
+/**
+ * The claimant's own lost report for this item is answered too, so it leaves the Lost list. It is the claimant's
+ * open lost report that matched the found one: the same category, sharing one of its places, the same rule as the
+ * match notice. Repeating `category` below means the two reports' categories must be equal.
+ */
+const ResolveClaimantsLost = reaction(({ report, claimant, lost, category }) =>
+  when(Claiming.claim({ claimant, item: report }).responds({ item: report }))
+    .where(
+      Reporting._getReport({ report }).is({ kind: "FOUND", category }),
+      Locating._getNeighbors({ item: report }).is({ other: lost }),
+      Reporting._getOpen({ kind: "LOST", category }).is({ report: lost }),
+      Reporting._getReport({ report: lost }).is({ reporter: claimant }),
+    )
+    .then(Reporting.resolve({ report: lost })),
+);
+
 const NotifyFinderOfClaim = reaction(({ report, reporter }) =>
   when(Claiming.claim({ item: report }).responds({ item: report }))
     .where(Reporting._getReport({ report }).is({ reporter }))
@@ -149,7 +165,7 @@ const ListMyClaims = endpoint(
 );
 
 export const composition = {
-  claiming: { ClaimReport, ResolveOnClaim, NotifyFinderOfClaim },
+  claiming: { ClaimReport, ResolveOnClaim, ResolveClaimantsLost, NotifyFinderOfClaim },
   collecting: { CollectClaim, NotifyFinderOfPickup },
   listing: { claimedCards, myClaims, ListClaims, ListMyClaims },
 };

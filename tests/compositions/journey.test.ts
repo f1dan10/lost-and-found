@@ -69,9 +69,9 @@ describe("Lost&Found", () => {
     expect(mailer.sent.at(-1)).toEqual({ to: "tom", message: "Your found item was claimed." });
     expect(mailer.sent).toHaveLength(2);
 
-    // Nobody can claim it again, and Tamar's own lost report stays open until she resolves it.
+    // Nobody can claim it again, and the claim closed Tamar's own lost report, so it left the Lost list.
     expect(await api.reports.claim({ session: tamar.session, report: found })).toEqual({ error: "NOT_FOUND" });
-    expect(ok(await api.reports.list({ session: tamar.session })).lost).toMatchObject([{ report: lost }]);
+    expect(ok(await api.reports.list({ session: tamar.session })).lost.map((card: { report: string }) => card.report)).not.toContain(lost);
 
     // The bell empties when each person reads their notice.
     ok(await api.notifications.read({ session: tamar.session, notification: matches[0]!.notification }));

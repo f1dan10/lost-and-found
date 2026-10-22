@@ -42,6 +42,24 @@ describe("Claiming a found item", () => {
     expect(await unread(tamar.user)).toEqual([]);
   });
 
+  test("claiming closes the claimant's matching lost report, but not someone else's or one of another category", async () => {
+    const { api, application, Reporting, tom, tamar, sam, file, status } = await setup();
+    const tamarsLost = await file(tamar.user, "LOST");
+    const samsLost = await file(sam.user, "LOST");
+    const { report: tamarsKeys } = ok(
+      await Reporting.file({ reporter: tamar.user as never, kind: "LOST", category: "KEYS_ID", description: "keys" }),
+    );
+    const bottle = await file(tom.user, "FOUND");
+
+    ok(await api.reports.claim({ session: tamar.session, report: bottle }));
+    await application.whenIdle();
+
+    expect(await status(tamarsLost)).toBe("RESOLVED");
+    expect(await status(samsLost)).toBe("OPEN");
+    expect(await status(tamarsKeys)).toBe("OPEN");
+    expect(ok(await api.reports.list({ session: tamar.session })).lost.map((card: { report: string }) => card.report)).not.toContain(tamarsLost);
+  });
+
   test("Tom claiming his own item is refused, and nothing changes", async () => {
     const { api, application, mailer, tom, file, status, unread } = await setup();
     const bottle = await file(tom.user, "FOUND");
