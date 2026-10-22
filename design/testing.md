@@ -1,151 +1,57 @@
 # Testing
 
-There are two kinds of checks. Automated tests run every concept and every endpoint against a real MongoDB. Plain functions behind the screens, such as the search, are tested the same way. A manual walk through the app in the browser checks what the tests can't: that the screens update, that mistakes are explained, and that the layout works on a laptop screen.
+156 automated tests in 24 files all pass. The last run is in [tests/output.txt](../tests/output.txt). The tests run against a real MongoDB.
 
-The latest test run is saved in [tests/output.txt](../tests/output.txt): 125 tests in 22 files, all passing. The README says how to run them.
+## Concepts (`tests/concepts/`)
 
-## Automated tests
+Each test follows the concept's principle, then checks every refusal, repeated actions, and two requests at once where something must be unique.
 
-### Concepts (`tests/concepts/`)
-
-Each concept test follows the concept's principle first, then checks the other cases:
-- every refusal
-- what a refusal leaves unchanged
-- repeated actions
-- ordering
-- for anything that must be unique, two requests at the same instant
-
-Every action, query and refusal in every specification runs in at least one test.
-
-| Concept | Actions | Refusals tested |
-|---|---|---|
-| Registering | register | INVALID_USERNAME, USERNAME_TAKEN |
-| Authenticating | set, authenticate | INVALID_PASSWORD, PASSWORD_SET, INVALID_CREDENTIALS |
-| Sessioning | start, use, end | NOT_SIGNED_IN |
-| Reporting | file, resolve, renew, withdraw | INVALID_REPORT, REPORT_NOT_FOUND, NOT_OPEN |
-| Locating | addPlace, reposition, locate | INVALID_PLACE, PLACE_EXISTS, NO_PLACES, TOO_MANY_PLACES, INVALID_SPOT, UNKNOWN_PLACE, ALREADY_LOCATED |
-| Notifying | setAddress, notify, markRead | INVALID_ADDRESS, UNKNOWN_RECIPIENT, NOTIFICATION_NOT_FOUND |
-| Claiming | claim | ALREADY_CLAIMED, including two claims at once |
-| Thanking | thank | INVALID_NOTE, ALREADY_THANKED, including two at once |
-
-Time-based behaviour uses a clock the test controls:
-- **Reporting:** a report expires after 14 days, and renewing moves its expiry forward.
-- **Claiming:** a claim leaves the recent list after 30 days, but its record stays.
-
-### Compositions (`tests/compositions/`)
-
-These call the endpoints through the same typed client the frontend uses. They wait for the reactions to finish before checking what changed.
-
-| File | What it checks |
+| Concept | Refusals tested |
 |---|---|
-| `journey.test.ts` | The whole user journey, from an empty database to the claim |
-| `listing.test.ts` | The Found and Lost lists and the places |
-| `matching.test.ts` | Match notices in both orders (found first or lost first), one notice per pair even when two buildings overlap, none for closed or expired reports |
-| `claims.test.ts` | Claiming, claiming your own report, stale claims, two claims at once, the HTTP status codes |
-| `claimed.test.ts` | The Claimed list never names the claimant; your own claims show the pickup details |
-| `owning.test.ts` | Removing and closing your own report, and your own list |
-| `expiry.test.ts` | Expired reports leave the lists and can't be claimed; renewing brings them back; old claims leave the Claimed list |
-| `thanks.test.ts` | Only the claimant can thank, once; the finder is told |
-| `notifications.test.ts` | Reading notices, and nobody marking another person's |
-| `addressing.test.ts`, `signing-in*.test.ts` | Sign-up, sign-in, sessions, and the cookie over HTTP |
+| Registering | INVALID_USERNAME, USERNAME_TAKEN |
+| Authenticating | INVALID_PASSWORD, PASSWORD_SET, INVALID_CREDENTIALS |
+| Sessioning | NOT_SIGNED_IN |
+| Reporting | INVALID_REPORT, REPORT_NOT_FOUND, NOT_OPEN |
+| Locating | INVALID_PLACE, PLACE_EXISTS, NO_PLACES, TOO_MANY_PLACES, INVALID_SPOT, UNKNOWN_PLACE, ALREADY_LOCATED |
+| Notifying | INVALID_ADDRESS, UNKNOWN_RECIPIENT, NOTIFICATION_NOT_FOUND |
+| Claiming | ALREADY_CLAIMED, NOT_CLAIMED, ALREADY_COLLECTED |
+| Thanking | INVALID_NOTE, ALREADY_THANKED |
 
-**Access control.** For every endpoint that changes a report or a notice, a test has another user try it and checks that nothing changed:
-- Sam removing, closing or renewing Tom's report
-- Tom thanking himself
-- anyone claiming their own item
-- someone marking another person's notice
+A test clock checks that reports expire after 14 days and that claims leave the recent list after 30.
 
-Each gets `NOT_FOUND` (or `CLAIMING_OWN_REPORT` for your own item). `NOT_FOUND` is the same answer as for a report that doesn't exist, so nobody learns which ids belong to someone else.
+## Compositions (`tests/compositions/`)
 
-### Frontend logic (`tests/frontend/`)
+These call the endpoints through the frontend's client. They cover:
+- the whole journey
+- matching in both orders
+- claims, including two at once
+- pickup, thanks, expiry and renewal
+- notices, and signing in
 
-The screens get their lists from plain functions, which are tested without a browser:
-- **`sections.test.ts`** checks what each sidebar section lists, in what order and under which heading. That includes 100 claims with 98 picked up (Your claims shows 2, History holds 98), where a notice opens, and where else a search matches.
-- **`search.test.ts`** checks the search rules: every word must match the start of a word, buildings by number or nickname, plurals, the person on a row, the highlighting, and that typed punctuation can't break it.
+**Access control:** when another user tries to remove, close, renew, thank for or pick up someone else's report, the answer is `NOT_FOUND` and nothing changes.
 
-## Walking through the web layout
+## Frontend (`tests/frontend/`)
 
-On Oct 21 I ran the production build locally and walked through the app at 1280 × 800 in the browser pane, signed in as Tamar, with Tom and Sam reporting through the API.
+- `sections.test.ts`: what each sidebar section lists, including 100 claims with 98 picked up.
+- `search.test.ts`: the search rules.
 
-| What I checked | Result |
-|---|---|
-| The sidebar counts | Right for every section. "Waiting on you" is tinted only while something waits. |
-| Searching "stata", then "black", then "bottle" | Counts change in every section. The list shows only matches, with the words highlighted. "Also matching: 1 in Lost" links to the other matches. On the map, only the buildings with bottles keep their pins. |
-| Arrow keys in the list | Move the choice up and down, and the panel follows. |
-| Claiming Tom's flask from the panel | It asked "Is this yours?" in place, then moved to Your claims with "It's yours", where to pick it up, and an offer to close my lost bottle report. Closing it worked. |
-| "I picked it up" | Toast: "Marked as picked up. tom will be told." The flask moved to History, and Waiting on you and Your claims dropped to 0. |
-| Saying thanks with a preset note | The panel shows "You thanked tom: 'You saved my day!'". |
-| My open report | Still looking, I got it back, Remove. Renewing showed "Renewed. It stays up for two more weeks." |
-| Someone else's lost jacket | "Report it as found" opens the found form. |
-| A building on the map | Its items list below the map, and choosing one fills the panel. The choice survives the 8-second refresh. |
-| "Report an item" | Opens the two choices under the button; each opens its form. |
+## Manual checks
 
-### Deploy check, Oct 21
+On Oct 21 I walked through the production build at 1024, 1280 and 1440 px wide, with three users. I checked:
+- searching
+- claiming and picking up
+- thanks
+- renewing
+- the map
+- the status codes over HTTP
 
-Before redeploying, I cloned the pushed commit into an empty folder and built it the way the platform does, with frozen lockfiles: `bun install`, then `bun run build`, then `bun run start`.
-- **Server:** `/health` answered `ok`, an inner page answered 200, and the seed added 112 buildings.
-- **Size:** the repository is 4.4 MB.
-- **Access control over real HTTP:**
+**Problems found and fixed:**
+- Claiming closed the detail panel.
+- The pickup box stayed after pickup.
+- "1 matches" was ungrammatical.
+- The report form needed scrolling.
+- Only 24 buildings could be chosen.
+- The map tiles needed an API key.
+- The map refresh stole keyboard focus.
 
-| Request | Status |
-|---|---|
-| Sam removes Tom's report | 404 |
-| Tom claims his own item | 403 |
-| Tamar claims it | 200 |
-| Sam or Tom marks it picked up | 404 |
-| Sam thanks for it | 404 |
-| Tamar marks it picked up | 200 |
-| Tamar marks it picked up again | 409 |
-| No session | 401 |
-
-Tom received "Your found item was claimed." and "Your found item was picked up."
-
-At 1024 × 720 and 1440 × 900 the page never scrolls sideways. At 1024 px "Waiting on you" wrapped onto two lines in the sidebar, so the sidebar grew to 232 px and its labels stay on one line.
-
-### Problems this walk-through found, all fixed
-
-- **Claiming closed the panel.** The claimed item left Found, so the panel lost it. The choice now follows the item to Your claims.
-- **After pickup, the panel still said "It's yours. Here's where to get it."** It now says "Picked up from", and the pickup box goes away.
-- **"1 matches"** became "1 item matches". The sidebar's screen-reader text no longer reads "1 items".
-- **"Report it as found … and sam is told right away"** was not always true, because Sam is only told if the building matches. It now says to report it in the building where it is.
-- **The tagline wrapped onto two lines in the header.** It now shows only on the sign-in page.
-
-## An earlier walk-through, with tabs
-
-On Oct 20 I ran the production build locally (`bun run build`, then `bun run start`). I walked through the app in the browser pane at phone width (334 px). At desktop width I only read the page text, without looking at the layout. Three people were signed up: Tamar in the browser, and Tom and Sam through the API.
-
-| What I checked | Result |
-|---|---|
-| Posting the lost-item form with nothing filled in | Refused with "Pick a category." The form keeps what was typed. |
-| Tamar posts a lost bottle in Buildings 2 and 34 | Toast: "Posted. You'll be told when someone finds a bottle in one of your buildings." The new card is outlined. |
-| Tom finds a bottle in Building 2 | Tamar's bell showed 1 unread within 8 seconds, with no reload. Opening the notice showed the Found tab and outlined Tom's card. |
-| Tamar claims it | "Is this yours?", then "It's yours: pick it up at Building 2, By the lobby bench". It offered to close her lost bottle report, and closing it worked. |
-| Yours tab | Both claims with pickup details. The closed report shows as "You got it back". |
-| Thanks with a preset note | "Thanks sent." The card now says "You thanked tom: 'You saved my day!'". |
-| Tamar removes, closes, renews or thanks for Tom's report, from her signed-in browser's console | All four answered 404 `NOT_FOUND`, and Tom's report stayed in the list. |
-| Sam claims an item while it is still on Tamar's screen, then Tamar claims it | The banner explains, and the item leaves her list. |
-| Map tab | Real campus map with grey streets; each building's pin is where OpenStreetMap puts it. Choosing Building 34 lists its reports below the map. |
-| Remove on my own report | Asks first ("You can't undo this"). "Keep it" cancels. |
-| A session from a server that restarted | Back to the sign-in screen, not an error. |
-
-### Problems the walk-through found, all fixed
-
-- **The pickup sentence broke into three lines** in the claim dialog and on claimed cards.
-- **Text areas used a monospace font.** The base styles didn't pass the page font to `textarea` and `select`.
-- **The map's tile provider, CARTO, now needs an API key.** It answered every tile with "API key required". I switched to Esri's Light Gray Canvas, which needs no key and keeps the map quiet.
-- **Every 8-second refresh redrew all the map markers.** That took a keyboard user's focus away. Markers now redraw only when a count, the selection or the zoom changes.
-- **Building names overlapped on a phone.** Zoomed out, pins show only their counts; names appear from zoom 17, and every pin keeps its name as its label.
-- **The building list sorted as text** (1, 10, 13, 2). It now sorts as numbers.
-- **The tab buttons had no accessible names**, and the building checkboxes were named by their ids. Both now have proper labels.
-- **The report form had to be scrolled, and its text was small.** I replaced the long list of building checkboxes with a search box: type "32" or "stata", pick the suggestion, and it becomes a chip. The form is now two columns on a laptop and fits without scrolling (531 px tall on a 900 px screen). Categories became icon chips. Body text went from 15 to 16 px.
-- **Only 24 buildings were listed.** The seed now has all 112 MIT buildings with a number in OpenStreetMap. Utility structures such as the power plant and cooling towers are left out. On the map, empty buildings appear only when you zoom in.
-- **The toast squeezed into half the width** on a phone.
-- **The lost form's subtitle said the wrong people would be told.**
-- **The claim refusals didn't say what happened next.** They now say where the item went.
-
-### Not checked yet
-
-- Screens narrower than 1024 px. The app is for laptop and desktop browsers.
-
-- The same walk-through on the deployed app, and a proper look at the desktop layout.
-- A screen reader beyond the accessibility tree.
+**Not checked:** screens narrower than 1024 px (the app is for laptops), and a real screen reader.
