@@ -1,7 +1,7 @@
 /**
  * The HTTP server: the API under /api, a health check, and the built Vue app.
  *
- * Settings come from the environment: PORT, PUBLIC_ORIGIN (the origin browsers use), and MONGODB_URI.
+ * Settings come from the environment: PORT, HOST, PUBLIC_ORIGIN (the origin browsers use), and MONGODB_URI.
  */
 import { createHttpHandler } from "@mit-sdg/sync-engine-http/handler";
 import { createGateway } from "@mit-sdg/sync-engine/boundary";
@@ -28,6 +28,8 @@ const NO_REFERRER = { "Referrer-Policy": "no-referrer" };
 
 const server = Bun.serve({
   port,
+  // The platform sets HOST to 0.0.0.0 so its health check can reach the app; locally it is unset.
+  hostname: process.env.HOST,
   async fetch(request) {
     const { pathname } = new URL(request.url);
     if (pathname.startsWith("/api/")) return handleApi(request);
