@@ -16,7 +16,9 @@ const port = Number(process.env.PORT ?? 3000);
 const publicOrigin = process.env.PUBLIC_ORIGIN ?? `http://localhost:${port}`;
 const site = `${import.meta.dir}/../../frontend/dist`;
 
+console.log("Connecting to MongoDB...");
 const database = await connect(process.env.MONGODB_URI);
+console.log("Connected. Adding any missing buildings...");
 await seedPlaces(database);
 const application = assembleLostFound({ database, mailer: new ConsoleMailer() });
 const gateway = createGateway<LostFoundWire>({ application });
@@ -49,5 +51,6 @@ async function connect(uri: string | undefined): Promise<Db> {
     console.warn("MONGODB_URI is not set, so the server stores data in memory and loses it when it stops.");
     return (await new MongoClient(memory.getUri()).connect()).db("lostfound");
   }
-  return (await new MongoClient(uri).connect()).db();
+  // Give up after 10 seconds, so an unreachable database is reported in the log before the platform's health check stops the app.
+  return (await new MongoClient(uri, { serverSelectionTimeoutMS: 10_000 }).connect()).db();
 }
