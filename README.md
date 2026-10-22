@@ -34,6 +34,7 @@ New since the Alpha:
 2. [Visual design study](design/visual-study/README.md)
 3. [Layout](design/layout.md)
 4. [Testing](design/testing.md), with the last run in [tests/output.txt](tests/output.txt)
+5. [Demo](https://drive.google.com/file/d/16EIpJkoqsvQuD6T3OSvIPqWeifWuyNWv/view?usp=sharing)
 
 ### Run it
 
