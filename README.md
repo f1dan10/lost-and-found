@@ -2,7 +2,7 @@
 
 A lost-and-found web app for MIT. A finder reports an item with one photo and leaves it where it is. An owner searches the found items, or posts what they lost and is told when a match turns up.
 
-**Live app:** https://lostandfound.mit-sdg.dev/ · **Demo video:** [watch](https://drive.google.com/file/d/16EIpJkoqsvQuD6T3OSvIPqWeifWuyNWv/view?usp=sharing)
+**Live app:** https://lostandfound.mit-sdg.dev/ · **Demo video:** [watch](https://drive.google.com/file/d/1WH2_m3oVceDW14GxP5PWHLp9bM6UBRcD/view?usp=sharing)
 
 6.1040 Software Design, Fall 2026.
 
