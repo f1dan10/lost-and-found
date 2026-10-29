@@ -61,7 +61,7 @@ onUnmounted(close);
   flex-direction: column;
   width: max-content;
   min-width: 200px;
-  max-width: 280px;
+  max-width: min(360px, calc(100vw - 32px));
   padding: 6px;
   border-radius: var(--radius-md);
   background: var(--color-surface);

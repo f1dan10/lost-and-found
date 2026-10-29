@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import Icon from "../reusable/ui/Icon.vue";
-import { daysLeft } from "./expiry.ts";
-import { categoryIcon, categoryLabel, timeAgo } from "./format.ts";
+import { categoryIcon, categoryLabel } from "./format.ts";
 import Marked from "./Marked.vue";
+import { expiryOf, personOf, tagOf, whenOf } from "./rowMeta.ts";
 import type { Row } from "./sections.ts";
 
 /**
@@ -13,46 +13,10 @@ import type { Row } from "./sections.ts";
 const props = defineProps<{ row: Row; selected: boolean; query: string }>();
 defineEmits<{ choose: [] }>();
 
-/** The tag at the end of the row: what state the item is in, in words, with the matching colour. */
-const tag = computed(() => {
-  const { state, kind } = props.row;
-  switch (state) {
-    case "open":
-      return kind === "found" ? { text: "Found", tone: "found", icon: "pin" as const } : { text: "Lost", tone: "lost", icon: "search" as const };
-    case "expired":
-      return { text: "Expired", tone: "muted", icon: "clock" as const };
-    case "claimed":
-      return { text: "Claimed", tone: "claimed", icon: "check" as const };
-    case "picked-up":
-      return { text: "Picked up", tone: "claimed", icon: "check" as const };
-    case "closed":
-      return { text: kind === "lost" ? "Got it back" : "Closed", tone: "muted", icon: "check" as const };
-    case "removed":
-      return { text: "Removed", tone: "muted", icon: "close" as const };
-  }
-});
-
-/** The time phrase that fits the section the row is in. */
-const when = computed(() => {
-  const { source, time } = props.row;
-  if (source.type === "claim") return source.claim.collectedAt ? `picked up ${timeAgo(time)}` : `claimed ${timeAgo(time)}`;
-  if (source.type === "returned") return `claimed ${timeAgo(time)}`;
-  return timeAgo(time);
-});
-
-/** For my open reports, how long they stay up. */
-const expiry = computed(() => {
-  const { source, state } = props.row;
-  if (source.type !== "mine" || state !== "open") return null;
-  const left = daysLeft(source.report.expiresAt);
-  return left <= 1 ? "Expires today" : `${left} days left`;
-});
-
-const person = computed(() => {
-  const { source, person } = props.row;
-  if (person === null) return null;
-  return source.type === "claim" ? `found by ${person}` : person;
-});
+const tag = computed(() => tagOf(props.row));
+const when = computed(() => whenOf(props.row));
+const expiry = computed(() => expiryOf(props.row));
+const person = computed(() => personOf(props.row));
 </script>
 
 <template>
@@ -75,13 +39,13 @@ const person = computed(() => {
         </span>
         <template v-if="row.spot"><span class="dot">·</span><Marked :text="row.spot" :query="query" /></template>
         <template v-if="person"><span class="dot">·</span><Marked :text="person" :query="query" /></template>
+        <span class="dot">·</span>{{ categoryLabel(row.category) }}
         <span class="dot">·</span>{{ when }}
       </span>
     </span>
     <span class="end">
       <span class="tag" :class="tag.tone"><Icon :name="tag.icon" :size="12" />{{ tag.text }}</span>
       <span v-if="expiry" class="expiry">{{ expiry }}</span>
-      <span class="sr-only">{{ categoryLabel(row.category) }}</span>
     </span>
   </button>
 </template>
@@ -100,7 +64,7 @@ const person = computed(() => {
   text-align: left;
 }
 .row:hover {
-  border-color: #b9b7b0;
+  border-color: var(--color-text-muted);
 }
 .row.selected {
   border-color: var(--color-text);
@@ -184,15 +148,15 @@ const person = computed(() => {
 }
 .tag.found {
   background: var(--color-found);
-  color: #ffffff;
+  color: var(--color-on-accent, #ffffff);
 }
 .tag.lost {
   background: var(--color-lost);
-  color: #ffffff;
+  color: var(--color-on-accent, #ffffff);
 }
 .tag.claimed {
   background: var(--color-claimed);
-  color: #ffffff;
+  color: var(--color-on-accent, #ffffff);
 }
 .tag.muted {
   background: var(--color-line);

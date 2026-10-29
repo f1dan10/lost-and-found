@@ -17,7 +17,6 @@
   --color-on-accent: #ffffff;
   --color-danger: #b42318;
   --color-danger-soft: #fbeeec;
-  --color-tip: #191a1e;
 
   /* Distinct hues, so a state reads at a glance. Colour is never the only cue: a word and an icon always go with it. */
   --color-found: #1d5fd1;

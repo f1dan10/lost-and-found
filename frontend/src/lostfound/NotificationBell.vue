@@ -38,7 +38,7 @@ async function open(notice: Notification) {
       </span>
     </template>
     <div class="notices">
-      <p v-if="!count" class="empty muted">No new notices</p>
+      <p v-if="!count" class="none"><Icon name="bell" :size="24" />No new notices</p>
       <ul v-else>
         <li v-for="notice in notifications" :key="notice.notification" class="notice">
           <button type="button" class="open" :disabled="working" @click="open(notice)">
@@ -77,13 +77,19 @@ async function open(notice: Notification) {
   text-align: center;
 }
 .notices {
-  width: min(360px, calc(100vw - 32px));
+  width: min(340px, calc(100vw - 48px));
   max-height: 70vh;
   overflow-y: auto;
 }
-.empty {
-  padding: var(--space-4);
-  text-align: center;
+.none {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-6) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
 }
 ul {
   list-style: none;

@@ -20,7 +20,7 @@ import Menu from "./reusable/ui/Menu.vue";
  * sidebar says where you are, the middle lists that section, and the right shows the chosen item. Each column
  * scrolls on its own, so the sidebar and the chosen item stay in view while you go down a long list.
  */
-const { lists, section, selected, loaded, error, toast, startPolling, reset } = useLostFound();
+const { lists, section, selected, loaded, error, toast, startPolling, reset, goHome } = useLostFound();
 const { me, signOut } = useSession();
 
 /** The chosen item's row, looked up in its section, or null when nothing is chosen or it has gone. */
@@ -39,7 +39,7 @@ onUnmounted(reset);
 <template>
   <div class="shell">
     <header class="head">
-      <Brand />
+      <button type="button" class="home" aria-label="Lost&Found, back to Found" @click="goHome"><Brand /></button>
       <SearchBar />
       <div class="actions">
         <ReportButton />
@@ -102,6 +102,17 @@ onUnmounted(reset);
 /* The header is one line; the tagline shows on the sign-in page instead. */
 .head :deep(.tagline) {
   display: none;
+}
+.home {
+  justify-self: start;
+  padding: 2px 6px 2px 2px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  text-align: left;
+}
+.home:hover {
+  background: var(--color-page);
 }
 .actions {
   display: flex;

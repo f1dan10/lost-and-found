@@ -6,7 +6,7 @@ import { type MyClaim, useLostFound } from "./useLostFound.ts";
 /** Thanks the finder once, with an optional short note; a preset fills the note in one tap. */
 const props = defineProps<{ claim: MyClaim }>();
 const emit = defineEmits<{ close: [] }>();
-const { thank, working } = useLostFound();
+const { thank, working, error } = useLostFound();
 
 const MAX_NOTE = 140;
 const PRESETS = ["Thank you so much!", "You saved my day!", "Thanks for leaving it somewhere safe."];
@@ -19,7 +19,7 @@ async function send() {
     return;
   }
   if (await thank(props.claim.report, note.value)) emit("close");
-  else refusal.value = "That didn't go through. The message at the top of the page says why.";
+  else refusal.value = error.value ?? "That didn't go through. Please try again.";
 }
 </script>
 

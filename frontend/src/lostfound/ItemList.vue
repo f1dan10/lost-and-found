@@ -3,6 +3,7 @@ import { computed, nextTick, ref, watch } from "vue";
 import { useSession } from "../reusable/session.ts";
 import Icon from "../reusable/ui/Icon.vue";
 import { CATEGORIES } from "./categories.ts";
+import ItemCard from "./ItemCard.vue";
 import ItemRow from "./ItemRow.vue";
 import { matchesElsewhere, search } from "./search.ts";
 import { rowsFor, type Row, SECTIONS, type Section } from "./sections.ts";
@@ -11,9 +12,10 @@ import { useLostFound } from "./useLostFound.ts";
 /**
  * The middle column: the rows of the section on screen, filtered by the search, with the controls that section needs.
  * Found and Lost have category chips and a sort; Returned has time chips; History shows 20 at a time. Sections that
- * group their rows, such as Waiting on you, show a heading per group. Arrow keys move the choice up and down.
+ * group their rows, such as Waiting on you, show a heading per group. The items show as rows or as cards, like the list
+ * and icon views of a file browser. Arrow keys move the choice.
  */
-const { lists, section, selected, query, show } = useLostFound();
+const { lists, section, selected, query, show, viewMode, setViewMode, homeCount } = useLostFound();
 const { me } = useSession();
 
 const PAGE = 20;
@@ -30,13 +32,14 @@ const range = ref<(typeof RANGES)[number]["id"]>("month");
 const shown = ref(PAGE);
 const list = ref<HTMLElement | null>(null);
 
-// Each section starts with its own filters cleared.
-watch(section, () => {
+// Each section starts with its own filters cleared, and so does going home.
+function clearFilters() {
   category.value = null;
   sort.value = "newest";
   range.value = "month";
   shown.value = PAGE;
-});
+}
+watch([section, homeCount], clearFilters);
 watch(query, () => (shown.value = PAGE));
 
 const info = computed(() => SECTIONS.find((entry) => entry.id === section.value)!);
@@ -96,7 +99,14 @@ function choose(row: Row) {
   show(section.value, row.report);
 }
 
-/** Up and down move the choice through the visible rows, and keep the chosen row in view. */
+/** How many cards fit across the grid, read from the browser's layout; 1 in the list. */
+function columns(): number {
+  if (viewMode.value === "list") return 1;
+  const grid = list.value?.querySelector(".cards");
+  return grid ? getComputedStyle(grid).gridTemplateColumns.split(" ").length : 1;
+}
+
+/** Up and down move the choice through the visible items, and keep the chosen one in view. In the grid, left and right step by one and up and down by a row. */
 function move(step: number) {
   const all = visible.value;
   if (all.length === 0) return;
@@ -118,16 +128,26 @@ function move(step: number) {
         <h2 :id="`title-${section}`">{{ info.title }}</h2>
         <p class="subtitle">{{ subtitle }}</p>
       </div>
-      <button v-if="query" type="button" class="button outline clear" @click="query = ''">
-        <Icon name="close" :size="16" />Clear search
-      </button>
-      <label v-else-if="browsing" class="sort">
-        Sort
-        <select v-model="sort">
-          <option value="newest">Newest first</option>
-          <option value="building">By building</option>
-        </select>
-      </label>
+      <div class="tools">
+        <button v-if="query" type="button" class="button outline clear" @click="query = ''">
+          <Icon name="close" :size="16" />Clear search
+        </button>
+        <label v-if="browsing" class="sort">
+          Sort
+          <select v-model="sort">
+            <option value="newest">Newest first</option>
+            <option value="building">By building</option>
+          </select>
+        </label>
+        <div class="views" role="group" aria-label="View as">
+          <button type="button" class="view" :class="{ on: viewMode === 'list' }" :aria-pressed="viewMode === 'list'" aria-label="List" title="List" @click="setViewMode('list')">
+            <Icon name="list" :size="18" />
+          </button>
+          <button type="button" class="view" :class="{ on: viewMode === 'grid' }" :aria-pressed="viewMode === 'grid'" aria-label="Grid" title="Grid" @click="setViewMode('grid')">
+            <Icon name="grid" :size="18" />
+          </button>
+        </div>
+      </div>
     </header>
 
     <div v-if="browsing" class="filters" role="group" aria-label="Category">
@@ -158,12 +178,20 @@ function move(step: number) {
       </button>
     </div>
 
-    <div v-if="visible.length" ref="list" class="groups" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)">
+    <div
+      v-if="visible.length"
+      ref="list"
+      class="groups"
+      @keydown.down.prevent="move(columns())"
+      @keydown.up.prevent="move(-columns())"
+      @keydown.right="viewMode === 'grid' && (($event.preventDefault(), move(1)))"
+      @keydown.left="viewMode === 'grid' && (($event.preventDefault(), move(-1)))"
+    >
       <section v-for="group in groups" :key="group.name ?? 'all'" class="group">
         <h3 v-if="group.name" class="group-name">{{ group.name }} <span>{{ group.rows.length }}</span></h3>
-        <ul class="rows">
+        <ul class="rows" :class="{ cards: viewMode === 'grid' }">
           <li v-for="row in group.rows" :key="row.key">
-            <ItemRow :row="row" :selected="selected?.report === row.report" :query="query" @choose="choose(row)" />
+            <component :is="viewMode === 'grid' ? ItemCard : ItemRow" :row="row" :selected="selected?.report === row.report" :query="query" @choose="choose(row)" />
           </li>
         </ul>
       </section>
@@ -226,8 +254,39 @@ function move(step: number) {
   color: var(--color-text);
   font-weight: 600;
 }
+.tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
 .clear {
   flex: none;
+}
+.views {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.view {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 37px;
+  border: 0;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+.view + .view {
+  border-left: 1.5px solid var(--color-border);
+}
+.view.on {
+  background: var(--color-text);
+  color: var(--color-surface);
+}
+.rows.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
 }
 .groups {
   display: flex;

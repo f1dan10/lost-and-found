@@ -38,6 +38,10 @@ const section = ref<Section>("found");
 const selected = ref<{ section: Section; report: ReportId } | null>(null);
 /** What is typed in the search box. */
 const query = ref("");
+/** How the items are laid out: as rows, or as cards with large pictures. It is a preference, so it survives sign-out and reloads. */
+const viewMode = ref<"list" | "grid">(readViewMode());
+/** Goes up each time the logo is used, so the list can clear its own filters. */
+const homeCount = ref(0);
 /** The item just claimed, so its claim view can say "It's yours" once and offer to close a matching lost report. */
 const justClaimed = ref<ReportId | null>(null);
 /** The report form that is open, if any: what the person is reporting. */
@@ -101,6 +105,31 @@ const lists = computed<Lists>(() => ({
   mine: mine.value,
   notifications: notifications.value,
 }));
+
+function readViewMode(): "list" | "grid" {
+  try {
+    return localStorage.getItem("lostfound.view") === "grid" ? "grid" : "list";
+  } catch {
+    return "list";
+  }
+}
+
+function setViewMode(mode: "list" | "grid") {
+  viewMode.value = mode;
+  try {
+    localStorage.setItem("lostfound.view", mode);
+  } catch {
+    // The choice still holds until the page is reloaded.
+  }
+}
+
+/** Back to the start: the Found section with nothing chosen, no search, and the list's filters cleared. */
+function goHome() {
+  section.value = "found";
+  selected.value = null;
+  query.value = "";
+  homeCount.value += 1;
+}
 
 /** Shows a section and chooses an item in it, such as the report a notice is about. */
 function show(where: Section, report: ReportId | null = null) {
@@ -294,6 +323,10 @@ export function useLostFound() {
     reporting,
     justClaimed,
     show,
+    viewMode,
+    setViewMode,
+    homeCount,
+    goHome,
     loaded,
     error,
     working,
