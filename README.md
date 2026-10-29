@@ -8,6 +8,7 @@ A lost-and-found web app for MIT. A finder reports an item with one photo and le
 
 ## Read more
 
+- **[User journey](design/user-journey.md):** Tamar loses a bottle, Jack finds it, and she gets it back.
 - **[Design document](design/design.md):** the final design, what changed since P1 and P3, the code review, and what is not built.
 - **Specifications:** [concepts](design/concepts), [compositions](design/compositions), and [types](design/types.md).
 - **Tests:** [what runs and the last results](tests/output.txt).

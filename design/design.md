@@ -14,7 +14,7 @@ Live app: https://lostandfound.mit-sdg.dev/
   - *Claiming*: one person claims a found item, later picks it up.
   - *Thanking*: a claimer thanks the finder.
 - **Seven compositions** in [`compositions/`](compositions/) connect them. Endpoints carry the access checks. Reactions do the follow-on work: a new found report notifies matching owners, a claim notifies the finder, and a claim closes the claimer's own matching lost report.
-- **One journey:** Tamar posts a lost bottle, Jack reports one found, Tamar is told, claims it, picks it up and thanks Jack. [`tests/compositions/journey.test.ts`](../tests/compositions/journey.test.ts) runs it.
+- **One journey** ([full text](user-journey.md)): Tamar posts a lost bottle, Jack reports one found, Tamar is told, claims it, picks it up and thanks Jack. [`tests/compositions/journey.test.ts`](../tests/compositions/journey.test.ts) runs it.
 
 ## What changed since P1
 
