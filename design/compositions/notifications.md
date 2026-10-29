@@ -4,7 +4,7 @@ The bell in the app reads two endpoints, and a person must be signed in to call 
 
 ## Listing
 
-[The unread notifications of a user](former:notifications.listing.notificationRows) are the notices `Notifying._getUnread` returns for them, newest first. Each comes with its message, its sent time, and the category and description of the report it is about, from Reporting. The notice text is fixed, so a finder who is told "Your found item was claimed." learns who claimed it here: the row has the claimant's username, from Claiming and Registering, and `null` while the report is unclaimed. The [list endpoint](reaction:notifications.listing.ListNotifications) responds with them as `notifications`.
+[The unread notifications of a user](former:notifications.listing.notificationRows) are the notices `Notifying._getUnread` returns for them, newest first. Each comes with its message, its sent time, and the category and description of the report it is about, from Reporting. The notice text is fixed, so a finder who is told "Your found item was claimed." learns who claimed it here. [The claimant of a report, seen by a user](view:notifications.listing.claimantSeenBy) is the username from Claiming and Registering, and only when the user filed that report. Everyone else, such as an owner with a match notice for the same item, gets `null`, as does the finder while the report is unclaimed. The [list endpoint](reaction:notifications.listing.ListNotifications) responds with them as `notifications`.
 
 ```endpoints
 notifications.listing.ListNotifications at /notifications/list

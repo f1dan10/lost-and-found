@@ -1,3 +1,0 @@
-# Beta user journey
-
-Tamar loses her pink water bottle somewhere between Building 2, the Student Center, Stata and Building 34. She opens Lost&Found, posts a lost report for a bottle in those four buildings, and goes to lab. An hour later Jack sees the bottle in Building 2. He reports it as found with one photo and keeps walking. Tamar's bell lights up, and the match shows under "Waiting on you". She clicks "This is mine", confirms, and sees where to pick it up. Her lost report closes by itself. After lab she collects the bottle and clicks "I picked it up". Jack is told it reached its owner, and Tamar thanks him with a short note. She posted once and made one trip, and Jack spent less than a minute to help someone.

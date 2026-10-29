@@ -12,7 +12,7 @@ Because the report is resolved a moment after the claim, a second person who ask
 
 ## Listing
 
-The Claimed tab shows what happened to found items, so a claimed item no longer just disappears. [The recently claimed items](former:claims.listing.claimedCards) are the claims `Claiming._recent` returns for the last 30 days, newest first. Each comes with the report's category and description from Reporting, its places and spot from Locating, its photo when it has one, and when it was claimed. A claim older than 30 days is left out of the list but stays in Claiming, because it is the record of who took the item. The rows say that an item was claimed, never who claimed it: the claimant's name goes only to the finder, in their notices and their own reports, and to the claimant. The [list endpoint](reaction:claims.listing.ListClaims) responds with them as `claims`.
+The Returned section shows what happened to found items, so a claimed item no longer just disappears. [The recently claimed items](former:claims.listing.claimedCards) are the claims `Claiming._recent` returns for the last 30 days, newest first. Each comes with the report's category and description from Reporting, its places and spot from Locating, its photo when it has one, and when it was claimed. A claim older than 30 days is left out of the list but stays in Claiming, because it is the record of who took the item. The rows say that an item was claimed, never who claimed it: the claimant's name goes only to the finder, in their notices and their own reports, and to the claimant. The [list endpoint](reaction:claims.listing.ListClaims) responds with them as `claims`.
 
 ```endpoints
 claims.listing.ListClaims at /claims/list
