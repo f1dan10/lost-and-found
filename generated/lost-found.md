@@ -254,6 +254,19 @@ Authored path: `access.permissions.owns`.
   where Reporting._getReport (report) has (reporter: user)
 ```
 
+### the claimant of (report), seen by (user)
+
+Authored path: `notifications.listing.claimantSeenBy`.
+- Covered by [Notifications](../design/compositions/notifications.md), line 7.
+
+```view
+the claimant of (report), seen by (user) — inputs (user, report); outputs (claimedBy); bindings (claimant) — answers at most one (claimedBy)
+  where
+    Reporting._getReport (report) has (reporter: user)
+    Claiming._getClaimant (item: report) has (claimant)
+    Registering._username (user: claimant) has (username: claimedBy)
+```
+
 ## Formers
 
 _Formers name result shapes evaluated when asked. The source former owns_
@@ -329,7 +342,6 @@ Former "the open reports of (kind)" — inputs (kind); bindings (report, categor
           name
           place
       report
-      reporter
       spot
       username
 ```
@@ -400,11 +412,10 @@ Authored path: `notifications.listing.notificationRows`.
 - Covered by [Notifications](../design/compositions/notifications.md), line 7.
 
 ```former
-Former "the unread notifications of (user)" — inputs (user); bindings (notification, message, subject, sentAt, category, description, claimant, claimedBy); promises exactly one record — forms:
+Former "the unread notifications of (user)" — inputs (user); bindings (notification, message, subject, sentAt, category, description, claimedBy); promises exactly one record — forms:
   each Notifying._getUnread (recipient: user) has (message, notification, sentAt, subject)
     where Reporting._getReport (report: subject) has (category, description)
-    where whether Claiming._getClaimant (item: subject) has (claimant)
-    where whether Registering._username (user: claimant) has (username: claimedBy)
+    where whether view "the claimant of (report), seen by (user)" with (report: subject, user) has (claimedBy)
     form a record of
       category
       claimedBy

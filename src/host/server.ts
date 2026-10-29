@@ -12,8 +12,12 @@ import { ConsoleMailer } from "../concepts/Notifying/mailer.ts";
 import { lostFoundPolicy } from "./http.ts";
 import { seedPlaces } from "./seed.ts";
 
+const production = process.env.NODE_ENV === "production";
 const port = Number(process.env.PORT ?? 3000);
 const publicOrigin = process.env.PUBLIC_ORIGIN ?? `http://localhost:${port}`;
+if (production && process.env.PUBLIC_ORIGIN === undefined) {
+  console.warn(`PUBLIC_ORIGIN is not set, so browsers must reach the app at ${publicOrigin}.`);
+}
 const site = `${import.meta.dir}/../../frontend/dist`;
 
 console.log("Connecting to MongoDB...");
@@ -24,12 +28,17 @@ const application = assembleLostFound({ database, mailer: new ConsoleMailer() })
 const gateway = createGateway<LostFoundWire>({ application });
 const handleApi = createHttpHandler({ application, gateway, policy: lostFoundPolicy(publicOrigin) });
 
-const NO_REFERRER = { "Referrer-Policy": "no-referrer" };
+const NO_REFERRER = { "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff" };
 
 const server = Bun.serve({
   port,
   // The platform sets HOST to 0.0.0.0 so its health check can reach the app; locally it is unset.
   hostname: process.env.HOST,
+  development: false,
+  error(error) {
+    console.error(error);
+    return new Response("Something went wrong.", { status: 500 });
+  },
   async fetch(request) {
     const { pathname } = new URL(request.url);
     if (pathname.startsWith("/api/")) return handleApi(request);
@@ -48,6 +57,7 @@ console.log(`Lost&Found is listening on ${server.url} for ${publicOrigin}.`);
 
 async function connect(uri: string | undefined): Promise<Db> {
   if (uri === undefined) {
+    if (production) throw new Error("MONGODB_URI must be set in production, or the data is lost when the server stops.");
     const { MongoMemoryServer } = await import("mongodb-memory-server");
     const memory = await MongoMemoryServer.create();
     console.warn("MONGODB_URI is not set, so the server stores data in memory and loses it when it stops.");

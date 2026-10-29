@@ -5,6 +5,10 @@ import { textInput } from "./reusable/inputs.ts";
 
 const { Registering, Sessioning, Reporting, Locating } = concepts;
 
+/** A photo is an image sent as a data URL, small enough for the request limit. Anything else, such as a link, is refused. */
+const IMAGE_URL = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+const MAX_PHOTO_TEXT = 700_000;
+
 /** A report is filed in 1 to 12 places, and refused actions aren't undone, so the places are checked before anything is filed. */
 const reportInput: EndpointValidator = (value) => {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -16,10 +20,12 @@ const reportInput: EndpointValidator = (value) => {
   }
   if (session !== null && typeof session !== "string") return { ok: false, detail: "expected text fields" };
   if (!Object.values(text).every((field) => typeof field === "string")) return { ok: false, detail: "expected text fields" };
-  if (spot !== undefined && spot !== null && (typeof spot !== "string" || spot.length < 1 || spot.length > 100)) {
+  if (spot !== undefined && spot !== null && (typeof spot !== "string" || spot.trim().length < 1 || spot.length > 100)) {
     return { ok: false, detail: "expected a spot of 1 to 100 characters" };
   }
-  if (photo !== undefined && photo !== null && typeof photo !== "string") return { ok: false, detail: "expected a photo as text" };
+  if (photo !== undefined && photo !== null && (typeof photo !== "string" || photo.length > MAX_PHOTO_TEXT || !IMAGE_URL.test(photo))) {
+    return { ok: false, detail: "expected a JPEG, PNG or WebP photo of at most 700 KB" };
+  }
   return { ok: true };
 };
 
@@ -72,7 +78,6 @@ export const reportCards = former(
         description,
         filedAt,
         expiresAt,
-        reporter,
         username,
         spot,
         photo,

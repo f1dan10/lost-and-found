@@ -188,7 +188,6 @@ export type LostFoundWire = {
           "place": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["place"]>>;
         }[];
         "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getOpen"]>>>, ["report"]>]>>;
-        "reporter": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>[0], ["user"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["reporter"]>]>>;
         "spot": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>>>, ["spot"]>> | null;
         "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>>>, ["username"]>>;
       })[];
@@ -203,7 +202,6 @@ export type LostFoundWire = {
           "place": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["place"]>>;
         }[];
         "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getOpen"]>>>, ["report"]>]>>;
-        "reporter": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>[0], ["user"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["reporter"]>]>>;
         "spot": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>>>, ["spot"]>> | null;
         "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>>>, ["username"]>>;
       })[];
@@ -435,7 +433,6 @@ export type LostFoundWireHttp = {
           "place": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["place"]>>;
         }[];
         "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getOpen"]>>>, ["report"]>]>>;
-        "reporter": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>[0], ["user"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["reporter"]>]>>;
         "spot": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>>>, ["spot"]>> | null;
         "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>>>, ["username"]>>;
       })[];
@@ -450,7 +447,6 @@ export type LostFoundWireHttp = {
           "place": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getPlacesOf"]>>>, ["place"]>>;
         }[];
         "report": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>[0], ["item"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getPhoto"]>[0], ["report"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>[0], ["report"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getOpen"]>>>, ["report"]>]>>;
-        "reporter": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>[0], ["user"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Reporting"]["_getReport"]>>>, ["reporter"]>]>>;
         "spot": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Locating"]["_getSpot"]>>>, ["spot"]>> | null;
         "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>>>, ["username"]>>;
       })[];

@@ -31,7 +31,7 @@ describe("Listing reports and places", () => {
     const { found, lost } = ok(await api.reports.list({ session: maya.session }));
     expect(found.map(({ description }) => description)).toEqual(["second found", "first found"]);
     expect(lost.map(({ description }) => description)).toEqual(["second lost", "first lost"]);
-    expect(found[0]).toMatchObject({ category: "BOTTLE", reporter: maya.user, username: "maya" });
+    expect(found[0]).toMatchObject({ category: "BOTTLE", username: "maya" });
 
     const names = ok(await api.places.list({ session: maya.session })).places.map(({ name }) => name);
     expect(names).toEqual(["Building 2", "Building 34", "Stata", "W20"]);
