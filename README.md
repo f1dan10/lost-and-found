@@ -12,6 +12,7 @@ A lost-and-found web app for MIT. A finder reports an item with one photo and le
 - **[Design document](design/design.md):** the final design, what changed since P1 and P3, the code review, and what is not built.
 - **Specifications:** [concepts](design/concepts), [compositions](design/compositions), and [types](design/types.md).
 - **Tests:** [what runs and the last results](tests/output.txt).
+- **P5 user study:** [tasks](design/p5/tasks.md), [study reports](design/p5/study-reports.md), [flaws and improvements](design/p5/flaws.md).
 - **P1 design:** [problem framing](design/p1/problem-framing.md), [pitch](design/p1/pitch.md), [concepts](design/p1/concepts.md), [sketches](design/p1/ui-sketches.md), [journey](design/p1/user-journey.md).
 - **Visual design:** [study (PDF)](design/visual-study/visual-study.pdf).
 
